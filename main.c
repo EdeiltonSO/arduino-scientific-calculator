@@ -3,6 +3,12 @@
 
 int len(char[]);
 
+typedef struct {
+    int isNumber;
+    int priority;
+    char content[];
+} STACK_ELEMENT;
+
 int main() {
     char input[] = "(5+4)*6-8/2";
 
