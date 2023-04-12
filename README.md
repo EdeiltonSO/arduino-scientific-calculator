@@ -36,6 +36,7 @@ prioridade de busca:
 
 acho que por enquanto tem que:
 
+- remover espaços
 - validar a expressão
 - adicionar um zero antes de um simbolo de - ou + se o anterior a ele não for um número ou um parêntese de fechamento
 - separar a string em um vetor
