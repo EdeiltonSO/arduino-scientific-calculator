@@ -32,7 +32,7 @@ prioridade de busca:
 
 - devolver o resultado
 
-## RESUMO
+# RESUMO
 
 acho que por enquanto tem que:
 
@@ -47,3 +47,34 @@ acho que por enquanto tem que:
 [-
 >0 5 - 35.9 42 56 * 74 5 2 ^ - / + 9 + 2 * 20 -
 -5 35.9 + 42 56 * ( 74 - 5 2 ^ + 9 + 2 * / - 20
+
+# TECLAS
+
+- on/off: chave
+
+- limpar
+- backspace
+- direcional E
+- direcional D
+
+```
+1 2 3 4 5 6 7 8 9 0
+. + - * / ^ ( ) =
+```
+
+23 teclas até aqui
+
+shift (pra inversa das funções abaixo)
+raiz
+sen
+cos
+tan
+e
+ln
+log
+
+30 teclas até aqui
+
+EXTRAS:
+pi
+integral definida
