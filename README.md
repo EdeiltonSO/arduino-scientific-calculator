@@ -36,13 +36,19 @@ prioridade de busca:
 
 acho que por enquanto tem que:
 
-- remover espaços
-- validar a expressão
-- adicionar um zero antes de um simbolo de - ou + se o anterior a ele não for um número ou um parêntese de fechamento
-- separar a string em um vetor
-- converter pra notação polonesa reversa
-- usar uma pilha pra operar a string em RPN
-- retornar o que sobrar na pilha
+[x] remover espaços (nao preciso, nao vai ter space no hardware)
+
+[ ] validar a expressão
+
+[ ] adicionar um zero antes de um simbolo de - ou + se o anterior a ele não for um número ou um parêntese de fechamento
+
+[ ] separar a string em um vetor
+
+[ ] converter pra notação polonesa reversa
+
+[ ] usar uma pilha pra operar a string em RPN
+
+[ ] retornar o que sobrar na pilha
 
 [-
 >0 5 - 35.9 42 56 * 74 5 2 ^ - / + 9 + 2 * 20 -
