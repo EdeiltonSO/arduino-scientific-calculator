@@ -71,12 +71,12 @@ acho que por enquanto tem que:
 23 teclas até aqui
 
 shift (pra inversa das funções abaixo)
-raiz
-sen
-cos
-tan
-ln / e
-log
+- raiz
+- sen
+- cos
+- tan
+- ln / e
+- log
 
 30 teclas até aqui
 
