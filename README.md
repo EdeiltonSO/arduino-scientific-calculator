@@ -75,8 +75,7 @@ raiz
 sen
 cos
 tan
-e
-ln
+ln / e
 log
 
 30 teclas até aqui
