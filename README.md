@@ -80,12 +80,12 @@ shift (pra inversa das funções abaixo)
 
 30 teclas até aqui
 
-QUESTÕES:
-como alternar entre graus e radianos? com um switch físico?
+# QUESTÕES:
+- como alternar entre graus e radianos? com um switch físico?
 
-DEFINIÇÕES:
-não haverá tecla pra constante pi
-não haverá tecla pra constante e
-não haverá função pra integral definida
-pra ter a constante e, o usuário fará e^1
-pra pi, o usuário digitará manualmente
+# DEFINIÇÕES:
+- não haverá tecla pra constante pi
+- não haverá tecla pra constante e
+- não haverá função pra integral definida
+- pra ter a constante e, o usuário fará e^1
+- pra pi, o usuário digitará manualmente
