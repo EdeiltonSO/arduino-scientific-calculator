@@ -71,7 +71,7 @@ acho que por enquanto tem que:
 23 teclas até aqui
 
 shift (pra inversa das funções abaixo)
-- raiz
+- raiz: decidir como implementar raizes de índice N
 - sen
 - cos
 - tan
@@ -80,6 +80,12 @@ shift (pra inversa das funções abaixo)
 
 30 teclas até aqui
 
-EXTRAS:
-pi
-integral definida
+QUESTÕES:
+como alternar entre graus e radianos? com um switch físico?
+
+DEFINIÇÕES:
+não haverá tecla pra constante pi
+não haverá tecla pra constante e
+não haverá função pra integral definida
+pra ter a constante e, o usuário fará e^1
+pra pi, o usuário digitará manualmente
