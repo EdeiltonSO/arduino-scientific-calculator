@@ -89,3 +89,7 @@ shift (pra inversa das funções abaixo)
 - não haverá função pra integral definida
 - pra ter a constante e, o usuário fará e^1
 - pra pi, o usuário digitará manualmente
+
+# FLUXO
+
+INPUT > ISVALID > STRUCTS > RPN_STACK > STACK_SOLVER > OUTPUT > DISPLAY
