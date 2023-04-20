@@ -1,8 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int isExpressionValid(char vetor[]) {
-    return 0;
+    int expressionLength = strlen(vetor);
+    for (int i = 0; i < expressionLength; i++)
+        printf("[%c] ", vetor[i]);
+    return 1;
 }
 
 void addZeroToSpecialCases(char vetor[]) {
@@ -21,8 +25,10 @@ typedef struct {
 int main() {
     char input[] = "-5+35.9+42*56/(74-(5^2+9)*2)-20";
 
-    printf("%d\n", strlen(input));
-    //printf("%s\n", addZeroToSpecialCases(input));
+    if (!isExpressionValid(input)) exit(1);
+
+    printf("%s\n", input[4]);
+    printf("%s\n\n", isExpressionValid(input));
 
     return 0;
 }
