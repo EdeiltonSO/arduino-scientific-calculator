@@ -2,15 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-int isExpressionValid(char vetor[]) {
-    int expressionLength = strlen(vetor);
-    for (int i = 0; i < expressionLength; i++)
-        printf("[%c] ", vetor[i]);
+int isExpressionValid(char vector[]) {
     return 1;
 }
 
-void addZeroToSpecialCases(char vetor[]) {
-    //return
+void addZeroToSpecialCases(char vector[]) {
+
+}
+
+void transformCharToStruct(char vector) {
+
+}
+
+void createRPNStack(/* recebe ponteiro pra pilha e array de structs */) {
+    // retorna status positivo se a pilha foi preenchida
+}
+
+void stackSolver(/* recebe ponteiro pra pilha */) {
+    // retorna resultado
 }
 
 typedef struct {
@@ -27,8 +36,11 @@ int main() {
 
     if (!isExpressionValid(input)) exit(1);
 
-    printf("%s\n", input[4]);
-    printf("%s\n\n", isExpressionValid(input));
+    int pos = 0;
+    while (input[pos] != '\0') {
+        printf("[%c] ", input[pos]);
+        pos++;
+    }
 
     return 0;
 }
