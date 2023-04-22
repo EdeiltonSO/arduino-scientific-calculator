@@ -41,6 +41,5 @@ int main() {
         printf("[%c] ", input[pos]);
         pos++;
     }
-
     return 0;
 }
