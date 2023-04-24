@@ -1,8 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
-int isExpressionValid(char vector[]) {
+#define ENTRADA "-5+35.9+42*56/(74-(5^2+9)*2)-20"
+// 0123456789.+-*/^()
+
+int isExpressionValid(char expression[]) {
+
+    // verifica caracteres proibidos pra posicao zero
+    // char forbbidenCharsForFirstPosition[] = "/[.*\/\^)]/gm";
+    // SUBSTITUIR PELA REGEX ACIMA
+    if (expression[0] == '.' ||
+        expression[0] == '*' ||
+        expression[0] == '/' ||
+        expression[0] == '^' ||
+        expression[0] == ')') return 0; 
+
+    int pos = 0;
+    while (expression[pos] != '\0') {
+        
+        pos++;
+    }
+
     return 1;
 }
 
@@ -27,7 +47,7 @@ typedef struct {
     // flags[7]: isNumber
     // flags[1:0]: priority
     char flags;
-    // content = "vetor de caracteres alocado dinamicamente"
+    // content = "vetor de caracteres com tamanho alocado dinamicamente"
     char content[];
 } STACK_ELEMENT;
 
