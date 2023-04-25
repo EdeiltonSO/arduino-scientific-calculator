@@ -6,20 +6,13 @@
 #define ENTRADA "-5+35.9+42*56/(74-(5^2+9)*2)-20"
 // 0123456789.+-*/^()
 
-int isExpressionValid(char expression[]) {
-    regex_t rgx;
-    char notFirst[] = "[.*\/\^)]";
-    int statusFirstPos = regcomp(&rgx, notFirst, 0);
-    printf("\nstatusFirstPos: %i\n", statusFirstPos);
-    int regexecReturn = regexec(&regex, expression, 0, NULL, 0);
-    printf("\nregexecReturn: %i\n", regexecReturn);
+int hasSyntaxError(char expression[]) {
 
-    // SUBSTITUIR PELA REGEX ACIMA
-    // if (expression[0] == '.' ||
-    //     expression[0] == '*' ||
-    //     expression[0] == '/' ||
-    //     expression[0] == '^' ||
-    //     expression[0] == ')') return 0; 
+    // verifica se o primeiro caractere do input é válido
+    regex_t rgx_notFirst;
+    char notFirst[] = "^[.*/^)]";
+    if (regcomp(&rgx_notFirst, notFirst, 0)) return 1;
+    if (!regexec(&rgx_notFirst, expression, 0, NULL, 0)) return 1;
 
     // int pos = 0;
     // while (expression[pos] != '\0') {
@@ -27,7 +20,7 @@ int isExpressionValid(char expression[]) {
     //     pos++;
     // }
 
-    return 1;
+    return 0;
 }
 
 void addZeroToSpecialCases(char vector[]) {
@@ -58,12 +51,13 @@ typedef struct {
 int main() {
     char input[] = "-5+35.9+42*56/(74-(5^2+9)*2)-20";
 
-    if (!isExpressionValid(input)) exit(1);
+    if (hasSyntaxError(input)) exit(1);
 
     int pos = 0;
     while (input[pos] != '\0') {
         printf("[%c] ", input[pos]);
         pos++;
     }
+    printf("\n");
     return 0;
 }
