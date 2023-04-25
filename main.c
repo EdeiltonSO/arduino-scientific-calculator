@@ -7,21 +7,25 @@
 // 0123456789.+-*/^()
 
 int isExpressionValid(char expression[]) {
+    regex_t rgx;
+    char notFirst[] = "[.*\/\^)]";
+    int statusFirstPos = regcomp(&rgx, notFirst, 0);
+    printf("\nstatusFirstPos: %i\n", statusFirstPos);
+    int regexecReturn = regexec(&regex, expression, 0, NULL, 0);
+    printf("\nregexecReturn: %i\n", regexecReturn);
 
-    // verifica caracteres proibidos pra posicao zero
-    // char forbbidenCharsForFirstPosition[] = "/[.*\/\^)]/gm";
     // SUBSTITUIR PELA REGEX ACIMA
-    if (expression[0] == '.' ||
-        expression[0] == '*' ||
-        expression[0] == '/' ||
-        expression[0] == '^' ||
-        expression[0] == ')') return 0; 
+    // if (expression[0] == '.' ||
+    //     expression[0] == '*' ||
+    //     expression[0] == '/' ||
+    //     expression[0] == '^' ||
+    //     expression[0] == ')') return 0; 
 
-    int pos = 0;
-    while (expression[pos] != '\0') {
+    // int pos = 0;
+    // while (expression[pos] != '\0') {
         
-        pos++;
-    }
+    //     pos++;
+    // }
 
     return 1;
 }
