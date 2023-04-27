@@ -1,64 +1,38 @@
 # isso aqui é pra ser o README mas vamos com calma
 
-```
-3 + 4 * 5 / ( 74 - 71 ) - 1
+## Software
 
-                -
-         +             1
-   3           /
-            *     -
-           4 5  74 71
-```
-
-prioridade de busca:
+### Prioridade do scan
 1. parênteses e funções
 2. potencias
 3. \* e /
 4. \+ e -
 
-- validar expressao
-
-- separar a string de entrada em um vetor de strings:
+### Etapas
+- receber entrada
+- checar erros de sintaxe
+- add zero antes de + e -
+- explodir a string
+- converter em vetor de structs
+- jogar structs numa pilha RPN
+- resolver a pilha em RPN
+- formatar dado de saída
 
 ```
+string validada:
 -5+35.9+42*56/(74-(5^2+9)*2)-20
 
+string explodida:
 ['-', '5', '+', '35.9', '+', '42', '*', '56', '/', '(', '74', '-', '(', '5', '^', '2', '+', '9', ')', '*', '2', ')', '-', '20']
 ```
 
-- converter vetor pra notação polonesa reversa (RPN)
+## HARDWARE
 
-- ler a expressão em RPN e usar uma pilha pras operações
+### Teclas
 
-- devolver o resultado
+- on/off: chave (direto no vcc)
 
-# RESUMO
-
-acho que por enquanto tem que:
-
-[x] remover espaços (nao preciso, nao vai ter space no hardware)
-
-[ ] validar a expressão
-
-[ ] adicionar um zero antes de um simbolo de - ou + se o anterior a ele não for um número ou um parêntese de fechamento
-
-[ ] separar a string em um vetor
-
-[ ] converter pra notação polonesa reversa
-
-[ ] usar uma pilha pra operar a string em RPN
-
-[ ] retornar o que sobrar na pilha
-
-[-
->0 5 - 35.9 42 56 * 74 5 2 ^ - / + 9 + 2 * 20 -
--5 35.9 + 42 56 * ( 74 - 5 2 ^ + 9 + 2 * / - 20
-
-# TECLAS
-
-- on/off: chave
-
-- limpar
+- clear
 - backspace
 - direcional E
 - direcional D
@@ -68,28 +42,25 @@ acho que por enquanto tem que:
 . + - * / ^ ( ) =
 ```
 
-23 teclas até aqui
+`>>> 23 teclas até aqui`
 
 shift (pra inversa das funções abaixo)
-- raiz: decidir como implementar raizes de índice N
+- raiz
 - sen
 - cos
 - tan
-- ln / e
+- e / ln
 - log
 
-30 teclas até aqui
+`>>> 30 teclas até aqui`
 
-# QUESTÕES
-- como alternar entre graus e radianos? com um switch físico?
+## Pontos pra análise
+- como responder entradas vazias?
+- como alternar entre graus e radianos?
+- como implementar raízes de índice N?
+- trocar o botão clear por segurar o backspace?
 
-# DEFINIÇÕES
-- não haverá tecla pra constante pi
-- não haverá tecla pra constante e
-- não haverá função pra integral definida
-- pra ter a constante e, o usuário fará e^1
-- pra pi, o usuário digitará manualmente
-
-# FLUXO
-
-INPUT > ISVALID > STRUCTS > RPN_STACK > STACK_SOLVER > OUTPUT > DISPLAY
+## Outras decisões
+- não haverá tecla pra constante pi (usuário digitará manualmente)
+- não haverá tecla pra constante e (usuário fará e^1)
+- por enquanto sem função pra integral definida
