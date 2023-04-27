@@ -11,7 +11,7 @@
 ### Etapas
 - receber entrada
 - checar erros de sintaxe
-- add zero antes de + e -
+- add zero antes e depois de + e - se necessário
 - explodir a string
 - converter em vetor de structs
 - jogar structs numa pilha RPN
@@ -64,3 +64,6 @@ shift (pra inversa das funções abaixo)
 - não haverá tecla pra constante pi (usuário digitará manualmente)
 - não haverá tecla pra constante e (usuário fará e^1)
 - por enquanto sem função pra integral definida
+
+## Melhorias futuras
+- permitir que o usuário calcule "1(1+1)"
