@@ -1,24 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <regex.h>
 
 #define ENTRADA "-5+35.9+42*56/(74-(5^2+9)*2)-20"
 // 0123456789.+-*/^()
 
 int hasSyntaxError(char expression[]) {
 
-    // verifica se o primeiro caractere do input é válido
-    regex_t rgx_notFirst;
-    char notFirst[] = "^[.*/^)]";
-    if (regcomp(&rgx_notFirst, notFirst, 0)) return 1;
-    if (!regexec(&rgx_notFirst, expression, 0, NULL, 0)) return 1;
+    // MUDANCA DE PLANOS: NAO VAI TER REGEX
+    // isso mesmo vai fazer tudo na unha
+    // igual um australopiteco pois LIMITAÇÕES DE MEMORIA
+    // que delicia cara
 
-    // int pos = 0;
-    // while (expression[pos] != '\0') {
+    int pos = 0;
+    while (expression[pos] != '\0') {
         
-    //     pos++;
-    // }
+        pos++;
+    }
 
     return 0;
 }
