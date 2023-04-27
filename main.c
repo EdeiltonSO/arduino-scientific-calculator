@@ -22,28 +22,41 @@ int hasSyntaxError(char expression[]) {
     int pos = 1;
     while (expression[pos] != '\0') {
 
-        // 0123456789. +-*/^()
-        if (expression[pos] >= '0' && expression[pos] <= '9')
-            if (expression[pos-1] == ')' ||
-                expression[pos+1] == '(') return 1; // exige asterisco
+        // se for 0~9
+        if (expression[pos] >= '0' 
+            && expression[pos] <= '9' 
+            && (expression[pos-1] == ')' 
+                || expression[pos+1] == '('))  // exige asterisco
+                return 1;
         
-        else if (expression[pos] == '.')
-            if (expression[pos-1] < '0' &&
-                expression[pos+1] > '9') return 1;
-        
-        else if (expression[pos] == '+' || expression[pos] == '-') {}
+        // se for .
+        else if (expression[pos] == '.' 
+            && (expression[pos-1] < '0' || expression[pos-1] > '9' 
+            || expression[pos+1] < '0' || expression[pos+1] > '9'))
+                return 1;
 
-        // ... * / ^ ( )
 
-        // ULTIMO CARACTERE DA EXPRESSAO
-        // ---------0123456789----------)----------
-        else if (expression[pos+1] == '\0')
-            if (!(expression[pos] < '0' && // 
-                expression[pos] > '9' && // 
-                expression[pos] == ')')) return 1; // 
-            // dar return 1 se for < 0 e > 9 e nao for ) no ultimo caractere
+        // se for + ou -
+        else if (expression[pos] == '+' || expression[pos] == '-')
+            if ((expression[pos-1] < '0' || expression[pos-1] > '9') // anterior != do range 0~9
+                && (expression[pos-1] < '(' || expression[pos-1] > ')') // anterior != de ( e )
+                && expression[pos-1] != '+' // devo admitir essa bizarrice?
+                && expression[pos-1] != '-' // devo admitir essa bizarrice?
+                || (expression[pos+1] < '0' || expression[pos+1] > '9') // posterior != do range 0~9
+                && (expression[pos+1] < '(' || expression[pos+1] > ')') // posterior != de ( e )
+                && expression[pos+1] != '+' // devo admitir essa bizarrice?
+                && expression[pos+1] != '-' // devo admitir essa bizarrice?
+            )
+            return 1;
 
-            // deu sono aqui viu valeu fui até mais
+        // já foi: 0123456789.+-
+        // falta: */^()
+
+        // ultimo caractere
+        if (expression[pos+1] == '\0'
+            && (expression[pos] < '0' || expression[pos] > '9')
+            && expression[pos] != ')')return 1;
+
         pos++;
     }
 
@@ -76,12 +89,12 @@ typedef struct {
 } STACK_ELEMENT;
 
 int main() {
-    char input[] = "-5+35.9+42*56/(74-(5^2+9)*2)-20";
-    char in[] = "5";
+    char input[] = "-5+-+--7--+-+-+++35.9+42*56/(74-(5^2+9)*2)-20";
+    //char in[] = "5";
     // if (hasSyntaxError(input)) exit(1);
 
     printf("\n>>> tem erro? %s\n", hasSyntaxError(input) ? "sim" : "nao");
-    printf("\nascii %i-%i-%i\n", '0', in[0], '9');
+    //printf("\nascii %i-%i-%i\n", '0', in[0], '9');
 
     // int pos = 0;
     // while (input[pos] != '\0') {
