@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+//#include <string.h>
 
 #define ENTRADA "-5+35.9+42*56/(74-(5^2+9)*2)-20"
-// 0123456789.+-*/^()
 
 int hasSyntaxError(char expression[]) {
 
@@ -12,7 +11,7 @@ int hasSyntaxError(char expression[]) {
     // igual um australopiteco pois LIMITAÇÕES DE MEMORIA
     // que delicia cara
 
-    // verificacoes iniciais
+    // ajeitar essa última condição
     if (expression[0] == '.' || 
         expression[0] == '*' ||
         expression[0] == '/' ||
@@ -22,7 +21,29 @@ int hasSyntaxError(char expression[]) {
 
     int pos = 1;
     while (expression[pos] != '\0') {
+
+        // 0123456789. +-*/^()
+        if (expression[pos] >= '0' && expression[pos] <= '9')
+            if (expression[pos-1] == ')' ||
+                expression[pos+1] == '(') return 1; // exige asterisco
         
+        else if (expression[pos] == '.')
+            if (expression[pos-1] < '0' &&
+                expression[pos+1] > '9') return 1;
+        
+        else if (expression[pos] == '+' || expression[pos] == '-') {}
+
+        // ... * / ^ ( )
+
+        // ULTIMO CARACTERE DA EXPRESSAO
+        // ---------0123456789----------)----------
+        else if (expression[pos+1] == '\0')
+            if (!(expression[pos] < '0' && // 
+                expression[pos] > '9' && // 
+                expression[pos] == ')')) return 1; // 
+            // dar return 1 se for < 0 e > 9 e nao for ) no ultimo caractere
+
+            // deu sono aqui viu valeu fui até mais
         pos++;
     }
 
@@ -56,16 +77,17 @@ typedef struct {
 
 int main() {
     char input[] = "-5+35.9+42*56/(74-(5^2+9)*2)-20";
-
+    char in[] = "5";
     // if (hasSyntaxError(input)) exit(1);
 
-    printf("\n>>> tem erro? %s\n\n", hasSyntaxError(input) ? "sim" : "nao");
+    printf("\n>>> tem erro? %s\n", hasSyntaxError(input) ? "sim" : "nao");
+    printf("\nascii %i-%i-%i\n", '0', in[0], '9');
 
-    int pos = 0;
-    while (input[pos] != '\0') {
-        printf("[%c] ", input[pos]);
-        pos++;
-    }
+    // int pos = 0;
+    // while (input[pos] != '\0') {
+    //     printf("[%c] ", input[pos]);
+    //     pos++;
+    // }
     printf("\n");
     return 0;
 }
