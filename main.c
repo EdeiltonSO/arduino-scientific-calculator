@@ -12,7 +12,15 @@ int hasSyntaxError(char expression[]) {
     // igual um australopiteco pois LIMITAÇÕES DE MEMORIA
     // que delicia cara
 
-    int pos = 0;
+    // verificacoes iniciais
+    if (expression[0] == '.' || 
+        expression[0] == '*' ||
+        expression[0] == '/' ||
+        expression[0] == '^' ||
+        expression[0] == ')' ||
+        expression[0] == '\0') return 1;
+
+    int pos = 1;
     while (expression[pos] != '\0') {
         
         pos++;
@@ -49,7 +57,9 @@ typedef struct {
 int main() {
     char input[] = "-5+35.9+42*56/(74-(5^2+9)*2)-20";
 
-    if (hasSyntaxError(input)) exit(1);
+    // if (hasSyntaxError(input)) exit(1);
+
+    printf("\n>>> tem erro? %s\n\n", hasSyntaxError(input) ? "sim" : "nao");
 
     int pos = 0;
     while (input[pos] != '\0') {
