@@ -6,12 +6,6 @@
 
 int hasSyntaxError(char expression[]) {
 
-    // MUDANCA DE PLANOS: NAO VAI TER REGEX
-    // isso mesmo vai fazer tudo na unha
-    // igual um australopiteco pois LIMITAÇÕES DE MEMORIA
-    // que delicia cara
-
-    // ajeitar essa última condição
     if (expression[0] == '.' || 
         expression[0] == '*' ||
         expression[0] == '/' ||
@@ -47,10 +41,19 @@ int hasSyntaxError(char expression[]) {
                 && expression[pos+1] != '+' // devo admitir essa bizarrice?
                 && expression[pos+1] != '-' // devo admitir essa bizarrice?
             )
-            return 1;
+                return 1;
 
-        // já foi: 0123456789.+-
-        // falta: */^()
+        // se for *, / ou ^
+        else if (expression[pos] == '*' || expression[pos] == '/' || expression[pos] == '^')
+            if ((expression[pos-1] < '0' || expression[pos-1] > '9')
+                && (expression[pos-1] != ')')
+                || (expression[pos+1] < '0' || expression[pos+1] > '9')
+                && (expression[pos+1] != '(')
+            )
+                return 1;
+
+        // já foi: 0123456789.+-*/^
+        // falta: ()
 
         // ultimo caractere
         if (expression[pos+1] == '\0'
