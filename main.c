@@ -34,12 +34,12 @@ int hasSyntaxError(char expression[]) {
         else if (expression[pos] == '+' || expression[pos] == '-')
             if ((expression[pos-1] < '0' || expression[pos-1] > '9') // anterior != do range 0~9
                 && (expression[pos-1] < '(' || expression[pos-1] > ')') // anterior != de ( e )
-                && expression[pos-1] != '+' // devo admitir essa bizarrice?
-                && expression[pos-1] != '-' // devo admitir essa bizarrice?
+                // && expression[pos-1] != '+' // devo admitir essa bizarrice? hoje não
+                // && expression[pos-1] != '-' // devo admitir essa bizarrice? hoje não
                 || (expression[pos+1] < '0' || expression[pos+1] > '9') // posterior != do range 0~9
                 && (expression[pos+1] < '(' || expression[pos+1] > ')') // posterior != de ( e )
-                && expression[pos+1] != '+' // devo admitir essa bizarrice?
-                && expression[pos+1] != '-' // devo admitir essa bizarrice?
+                // && expression[pos+1] != '+' // devo admitir essa bizarrice? hoje não
+                // && expression[pos+1] != '-' // devo admitir essa bizarrice? hoje não
             )
                 return 1;
 
@@ -54,6 +54,14 @@ int hasSyntaxError(char expression[]) {
 
         // já foi: 0123456789.+-*/^
         // falta: ()
+
+        // else if (expression[pos] == '(' || expression[pos] == ')')
+        //     if ((expression[pos-1] < '0' || expression[pos-1] > '9')
+        //         && (expression[pos-1] != ')')
+        //         || (expression[pos+1] < '0' || expression[pos+1] > '9')
+        //         && (expression[pos+1] != '(')
+        //     )
+        //         return 1;
 
         // ultimo caractere
         if (expression[pos+1] == '\0'
