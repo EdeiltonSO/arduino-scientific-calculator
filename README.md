@@ -67,3 +67,4 @@ shift (pra inversa das funções abaixo)
 
 ## Melhorias futuras
 - permitir que o usuário calcule "1(1+1)"
+- tratar sintax error pra press = com string vazia
