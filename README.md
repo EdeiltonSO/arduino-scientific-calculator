@@ -1,4 +1,4 @@
-# isso aqui é pra ser o README mas vamos com calma
+# isso aqui é pra ser o readme, mas vamos com calma
 
 ## SOFTWARE
 
