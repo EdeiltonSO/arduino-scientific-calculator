@@ -1,6 +1,6 @@
 # isso aqui é pra ser o README mas vamos com calma
 
-## Software
+## SOFTWARE
 
 ### Prioridade do scan
 1. parênteses e funções
