@@ -1,77 +1,75 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string.h>
 
-#define ENTRADA "-5+35.9+42*56/(74-(5^2+9)*2)-20"
+#define ENTRADA "-5+35.9+42^56/(74-(5^2+9)*2)-20"
 
-int hasSyntaxError(char expression[]) {
+int hasSyntaxError(char exp[]) {
 
-    if (expression[0] == '.' || 
-        expression[0] == '*' ||
-        expression[0] == '/' ||
-        expression[0] == '^' ||
-        expression[0] == ')' ||
-        expression[0] == '\0') return 1;
+    if (exp[0] == '.' || exp[0] == '*' ||
+        exp[0] == '/' || exp[0] == '^' ||
+        exp[0] == ')' || exp[0] == '\0') return 1;
 
     int pos = 1;
-    while (expression[pos] != '\0') {
+    int openedBrackets = 0;
+    while (exp[pos] != '\0') {
 
-        // se for 0~9
-        if (expression[pos] >= '0' 
-            && expression[pos] <= '9' 
-            && (expression[pos-1] == ')' 
-                || expression[pos+1] == '('))  // exige asterisco
-                return 1;
+        if (exp[pos] >= '0' && exp[pos] <= '9' &&
+        (exp[pos-1] == ')' || exp[pos+1] == '(')
+        ) return 1;
         
-        // se for .
-        else if (expression[pos] == '.' 
-            && (expression[pos-1] < '0' || expression[pos-1] > '9' 
-            || expression[pos+1] < '0' || expression[pos+1] > '9'))
-                return 1;
+        else if (exp[pos] == '.'
+        && (exp[pos-1] < '0' || exp[pos-1] > '9'
+        || exp[pos+1] < '0' || exp[pos+1] > '9')
+        ) return 1;
 
+        else if (exp[pos] == '+' || exp[pos] == '-')
+        {
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
+            && (exp[pos-1] < '(' || exp[pos-1] > ')')
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && (exp[pos+1] < '(' || exp[pos+1] > ')')
+            ) return 1;
+        }
 
-        // se for + ou -
-        else if (expression[pos] == '+' || expression[pos] == '-')
-            if ((expression[pos-1] < '0' || expression[pos-1] > '9') // anterior != do range 0~9
-                && (expression[pos-1] < '(' || expression[pos-1] > ')') // anterior != de ( e )
-                // && expression[pos-1] != '+' // devo admitir essa bizarrice? hoje não
-                // && expression[pos-1] != '-' // devo admitir essa bizarrice? hoje não
-                || (expression[pos+1] < '0' || expression[pos+1] > '9') // posterior != do range 0~9
-                && (expression[pos+1] < '(' || expression[pos+1] > ')') // posterior != de ( e )
-                // && expression[pos+1] != '+' // devo admitir essa bizarrice? hoje não
-                // && expression[pos+1] != '-' // devo admitir essa bizarrice? hoje não
-            )
-                return 1;
+        else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
+        {
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
+            && (exp[pos-1] != ')')
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && (exp[pos+1] != '(')
+            ) return 1;
+        }
 
-        // se for *, / ou ^
-        else if (expression[pos] == '*' || expression[pos] == '/' || expression[pos] == '^')
-            if ((expression[pos-1] < '0' || expression[pos-1] > '9')
-                && (expression[pos-1] != ')')
-                || (expression[pos+1] < '0' || expression[pos+1] > '9')
-                && (expression[pos+1] != '(')
-            )
-                return 1;
+        else if (exp[pos] == '(')
+        {
+            openedBrackets++;
+            if (exp[pos-1] != '+' && exp[pos-1] != '-'
+            && exp[pos-1] != '*' && exp[pos-1] != '/'
+            && exp[pos-1] != '^' && exp[pos-1] != '('
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && exp[pos+1] != '+' && exp[pos+1] != '-'
+            && exp[pos+1] != '('
+            ) return 1;
+        }
 
-        // já foi: 0123456789.+-*/^
-        // falta: ()
+        else if (exp[pos] == ')')
+        {
+            openedBrackets--;
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
+            || exp[pos+1] != '+' && exp[pos+1] != '-'
+            && exp[pos+1] != '*' && exp[pos+1] != '/'
+            && exp[pos+1] != '^' && exp[pos+1] != ')'
+            ) return 1;
+        }
 
-        // else if (expression[pos] == '(' || expression[pos] == ')')
-        //     if ((expression[pos-1] < '0' || expression[pos-1] > '9')
-        //         && (expression[pos-1] != ')')
-        //         || (expression[pos+1] < '0' || expression[pos+1] > '9')
-        //         && (expression[pos+1] != '(')
-        //     )
-        //         return 1;
-
-        // ultimo caractere
-        if (expression[pos+1] == '\0'
-            && (expression[pos] < '0' || expression[pos] > '9')
-            && expression[pos] != ')')return 1;
+        if (exp[pos+1] == '\0'
+            && (exp[pos] < '0' || exp[pos] > '9')
+            && exp[pos] != ')')return 1;
 
         pos++;
     }
 
-    return 0;
+    return openedBrackets ? 1 : 0;
 }
 
 void addZeroToSpecialCases(char vector[]) {
@@ -100,12 +98,9 @@ typedef struct {
 } STACK_ELEMENT;
 
 int main() {
-    char input[] = "-5+-+--7--+-+-+++35.9+42*56/(74-(5^2+9)*2)-20";
-    //char in[] = "5";
     // if (hasSyntaxError(input)) exit(1);
 
-    printf("\n>>> tem erro? %s\n", hasSyntaxError(input) ? "sim" : "nao");
-    //printf("\nascii %i-%i-%i\n", '0', in[0], '9');
+    printf("\n>>> tem erro? %s\n", hasSyntaxError(ENTRADA) ? "sim" : "nao");
 
     // int pos = 0;
     // while (input[pos] != '\0') {
