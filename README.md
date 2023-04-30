@@ -9,14 +9,14 @@
 4. \+ e -
 
 ### Etapas
-- receber entrada
-- checar erros de sintaxe
-- add zero antes e depois de + e - se necessário
-- explodir a string
-- converter em vetor de structs
-- jogar structs numa pilha RPN
-- resolver a pilha em RPN
-- formatar dado de saída
+- [ ] receber entrada
+- [x] checar erros de sintaxe
+- [ ] add 0 antes dos +, - e . que precisarem
+- [ ] explodir a string
+- [ ] converter em vetor de structs
+- [ ] jogar structs numa pilha RPN
+- [ ] resolver a pilha em RPN
+- [ ] formatar dado de saída
 
 ```
 string validada:
@@ -59,6 +59,7 @@ shift (pra inversa das funções abaixo)
 - como alternar entre graus e radianos?
 - como implementar raízes de índice N?
 - trocar o botão clear por segurar o backspace?
+- preciso adicionar 0 **depois** de +, - e .?
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
