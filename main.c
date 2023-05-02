@@ -73,7 +73,11 @@ int hasSyntaxError(char exp[]) {
 }
 
 void addZeroToSpecialCases(char vector[]) {
-
+    int pos = 0;
+    while (vector[pos] != '\0') {
+        printf("%c ", vector[pos]);
+        pos++;
+    }
 }
 
 void transformCharToStruct(char vector) {
@@ -102,6 +106,7 @@ int main() {
 
     printf("\n>>> tem erro? %s\n", hasSyntaxError(ENTRADA) ? "sim" : "nao");
 
+    addZeroToSpecialCases(ENTRADA);
     // int pos = 0;
     // while (input[pos] != '\0') {
     //     printf("[%c] ", input[pos]);
