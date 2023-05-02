@@ -73,9 +73,18 @@ int hasSyntaxError(char exp[]) {
 }
 
 void addZeroToSpecialCases(char vector[]) {
-    int pos = 0;
+    
+    if (vector[0] == '.' || vector[0] == '+' || vector[0] == '-')
+        printf("0%c", vector[0]);
+    
+    
+    int pos = 1;
     while (vector[pos] != '\0') {
-        printf("%c ", vector[pos]);
+        
+        if (vector[pos] == '.' || vector[pos] == '+' || vector[pos] == '-')
+            printf("0%c", vector[pos]);
+        else
+            printf("%c", vector[pos]);
         pos++;
     }
 }
