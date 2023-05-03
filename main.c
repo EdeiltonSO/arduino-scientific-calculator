@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
 
@@ -72,8 +73,11 @@ int hasSyntaxError(char exp[]) {
 }
 
 char * addZeroToSpecialCases(char exp[], char newExp[]) {
-    printf("\n>>> tamanho do endereco de newExp: %i bytes", sizeof(newExp));
-    printf("\n>>> tamanho do conteudo de newExp: %i bytes\n\n", sizeof((*newExp)));
+    printf("\nNEWEXP:");
+    printf("\n>>> conteudo: %s", newExp);
+    printf("\n>>> tamanho do endereco: %i bytes", sizeof(newExp));
+    printf("\n>>> tamanho do conteudo da primeira posicao: %i bytes", sizeof((*newExp)));
+    printf("\n>>> comprimento do conteudo da string iniciada em newExp[0]: %i\n\n", strlen(newExp));
 
     if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
         printf("0%c", exp[0]);
@@ -127,7 +131,7 @@ int main() {
     // if (hasSyntaxError(input)) exit(1);
 
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
-    char newExp[] = "a";
+    char newExp[] = "qwerty";
 
     printf("\n>>> tem erro? %s\n", hasSyntaxError(input) ? "sim" : "nao");
     printf(">>> tamanho: %i bytes (com char null)\n", sizeof(input)*sizeof(char));
