@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ENTRADA "-.5+35.9+42^56/(-74-(+5^2+9)*2)-20"
+#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
 
 int hasSyntaxError(char exp[]) {
 
@@ -77,12 +77,9 @@ void addZeroToSpecialCases(char exp[]) {
     
     int pos = 1;
     while (exp[pos] != '\0') {
-        if ((exp[pos] == '+' || exp[pos] == '-')
-        && (exp[pos-1] < '0' || exp[pos-1] > '9')
-        && exp[pos-1] != ')')
-            printf("0%c", exp[pos]);
-        else if (exp[pos] == '.' 
-        && (exp[pos-1] < '0' || exp[pos-1] > '9'))
+        if (((exp[pos] == '+' || exp[pos] == '-') 
+        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
+        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
             printf("0%c", exp[pos]);
         else
             printf("%c", exp[pos]);
