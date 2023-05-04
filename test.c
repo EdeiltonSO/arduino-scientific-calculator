@@ -2,69 +2,55 @@
 #include <stdlib.h>
 #include <string.h>
 
-int isExpressionValid(char vector[]) {
-    return 1;
+char * addZeroToSpecialCases(char exp[], char newExp[]) {
+    printf("\nNEWEXP:");
+    printf("\n>>> conteudo: %s", newExp);
+    printf("\n>>> tamanho em bytes do endereco: %i", sizeof(newExp));
+    printf("\n>>> tamanho em bytes do conteudo em newExp[0]: %i", sizeof((*newExp)));
+    printf("\n>>> comprimento da string iniciada em newExp[0]: %i\n\n", strlen(newExp));
+
+    printf("\n>>> tamanho em bytes da string inteira (w/ null): %i", sizeof(&newExp)*sizeof(char));
+
+    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
+        printf("0%c", exp[0]);
+
+    int pos = 1;
+    while (exp[pos] != '\0') {
+        if (((exp[pos] == '+' || exp[pos] == '-') 
+        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
+        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
+        {
+            printf("0%c", exp[pos]);
+            // aloca em newExp o espaço de um char
+            // adiciona '0' nesse espaço
+            // aloca em newExp o espaço de um char
+            // adiciona exp[0] nesse espaço
+        }
+        else
+        {
+            printf("%c", exp[pos]);
+            // aloca em newExp o espaço de um char
+            // adiciona exp[0] nesse espaço
+        }
+        pos++;
+    }
+
+    return newExp;
 }
-
-void addZeroToSpecialCases(char vector[]) {
-
-}
-
-void transformCharToStruct(char vector) {
-
-}
-
-void createRPNStack(/* recebe ponteiro pra pilha e array de structs */) {
-    // retorna status positivo se a pilha foi preenchida
-}
-
-void stackSolver(/* recebe ponteiro pra pilha */) {
-    // retorna resultado
-}
-
-typedef struct {
-    // flags = [00000000]
-    // flags[7]: isNumber
-    // flags[1:0]: priority
-    char flags;
-    // content = "vetor de caracteres alocado dinamicamente"
-    char content[];
-} STACK_ELEMENT;
 
 int main() {
-    /*
-    char input[] = "-5+35.9+42*56/(74-(5^2+9)*2)-20";
+    // if (hasSyntaxError(input)) exit(1);
 
-    if (!isExpressionValid(input)) exit(1);
+    char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
+    char newExp[] = "qwerty";
 
-    int pos = 0;
-    while (input[pos] != '\0') {
-        printf("[%c] ", input[pos]);
-        pos++;
-    }
-    */
+    printf(">>> tamanho: %i bytes (com char null)\n", sizeof(input)*sizeof(char));
 
-    char name[9];
-    for (int i = 0; i < 10; i++)
-        name[i] = '\0';
-    for (int i = 0; i < 10; i++)
-        switch (i)
-        {
-            case 0: name[i] |= (1 << 6) | (1 << 5) | (1 << 2) | (1 << 0);                       break;
-            case 1: name[i] |= (1 << 6) | (1 << 5) | (1 << 2);                                  break;
-            case 2: name[i] |= (1 << 6) | (1 << 5) | (1 << 2) | (1 << 0);                       break;
-            case 3: name[i] |= (1 << 6) | (1 << 5) | (1 << 3) | (1 << 0);                       break;
-            case 4: name[i] |= (1 << 6) | (1 << 5) | (1 << 3) | (1 << 2);                       break;
-            case 5: name[i] |= (1 << 6) | (1 << 5) | (1 << 4) | (1 << 2);                       break;
-            case 6: name[i] |= (1 << 6) | (1 << 5) | (1 << 3) | (1 << 2) | (1 << 1) | (1 << 0); break;
-            case 7: name[i] |= (1 << 6) | (1 << 5) | (1 << 3) | (1 << 2) | (1 << 1);            break;        
-            default:                                                                            break;
-        }
-    int pos = 0;
-    while (name[pos] != '\0') {
-        printf("%c", name[pos]);
-        pos++;
-    }
+    printf(input);
+    printf("\n");
 
+    addZeroToSpecialCases(input, newExp);
+
+    printf("\n");
     return 0;
 }

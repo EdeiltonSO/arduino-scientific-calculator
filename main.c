@@ -73,14 +73,15 @@ int hasSyntaxError(char exp[]) {
 }
 
 char * addZeroToSpecialCases(char exp[], char newExp[]) {
-    printf("\nNEWEXP:");
-    printf("\n>>> conteudo: %s", newExp);
-    printf("\n>>> tamanho do endereco: %i bytes", sizeof(newExp));
-    printf("\n>>> tamanho do conteudo da primeira posicao: %i bytes", sizeof((*newExp)));
-    printf("\n>>> comprimento do conteudo da string iniciada em newExp[0]: %i\n\n", strlen(newExp));
 
     if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
+    {
         printf("0%c", exp[0]);
+        // aloca em newExp o espaço de um char
+        // adiciona '0' nesse espaço
+        // aloca em newExp o espaço de um char
+        // adiciona exp[0] nesse espaço
+    }
 
     int pos = 1;
     while (exp[pos] != '\0') {
@@ -128,26 +129,11 @@ typedef struct {
 } STACK_ELEMENT;
 
 int main() {
-    // if (hasSyntaxError(input)) exit(1);
-
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
     char newExp[] = "qwerty";
 
-    printf("\n>>> tem erro? %s\n", hasSyntaxError(input) ? "sim" : "nao");
-    printf(">>> tamanho: %i bytes (com char null)\n", sizeof(input)*sizeof(char));
-
-    printf(input);
-    printf("\n");
-
     addZeroToSpecialCases(input, newExp);
 
-    // printf(">>> tamanho do retorno: %i bytes\n", sizeof());
-
-    // int pos = 0;
-    // while (input[pos] != '\0') {
-    //     printf("[%c] ", input[pos]);
-    //     pos++;
-    // }
     printf("\n");
     return 0;
 }
