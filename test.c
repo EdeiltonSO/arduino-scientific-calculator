@@ -9,7 +9,7 @@ char * addZeroToSpecialCases(char exp[], char newExp[]) {
     printf("\n>>> tamanho em bytes do conteudo em newExp[0]: %i", sizeof((*newExp)));
     printf("\n>>> comprimento da string iniciada em newExp[0]: %i\n\n", strlen(newExp));
 
-    printf("\n>>> tamanho em bytes da string inteira (w/ null): %i", sizeof(&newExp)*sizeof(char));
+    printf("\n>>> tamanho em bytes da string inteira (w/ null): %i", sizeof(newExp)*sizeof(char));
 
     if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
         printf("0%c", exp[0]);
