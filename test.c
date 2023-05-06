@@ -57,12 +57,14 @@ int main() {
 
     printf("length vetor = %i", strlen(vetor));
     printf("\n");
-    // printf("vetor = %i", strlen(vetor)*sizeof(char));
-    // printf("\n");
+
     printf("length novo_vetor = %i", novo_tamanho * sizeof(char));
     printf("\n");
 
     printf("vetor[0] = %c", vetor[0]);
+    printf("\n");
+
+    printf("novo_vetor[0] = %c", novo_vetor[0]);
     printf("\n");
 
     return 0;
