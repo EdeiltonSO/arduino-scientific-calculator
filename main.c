@@ -76,8 +76,10 @@ char * addZeroToSpecialCases(char exp[], char newExp[]) {
 
     if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
     {
+        int length = sizeof(newExp);
         printf("0%c", exp[0]);
         // aloca em newExp o espaço de um char
+        realloc(newExp, length+1);
         // adiciona '0' nesse espaço
         // aloca em newExp o espaço de um char
         // adiciona exp[0] nesse espaço
