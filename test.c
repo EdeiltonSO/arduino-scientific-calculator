@@ -21,3 +21,12 @@ int main() {
 
     return 0;
 }
+
+// char* test = (char*) calloc(1, sizeof(char));
+// test = (char *) realloc(test, 6);
+// test[0] = 'a';
+// test[1] = 'l';
+// test[2] = 'o';
+// test[3] = 'w';
+// test[4] = '!';
+// test[5] = '\0';
