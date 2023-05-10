@@ -14,7 +14,7 @@ int main() {
     printf("\nDEPOIS:");
     exp = (char *) realloc(exp, size+1);
     exp[0] = '0';
-    exp[1] = '\n';
+    exp[1] = '\0';
     size++;
 
     printf("\n>>> exp[0]: %c\n>>> exp[1]: %c", exp[0], exp[1]);
