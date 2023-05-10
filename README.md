@@ -11,7 +11,7 @@
 ### Etapas
 - [ ] receber entrada
 - [x] checar erros de sintaxe
-- [ ] add 0 antes dos +, - e . que precisarem
+- [x] add 0 antes dos +, - e . que precisarem
 - [ ] explodir a string
 - [ ] converter em vetor de structs
 - [ ] jogar structs numa pilha RPN
