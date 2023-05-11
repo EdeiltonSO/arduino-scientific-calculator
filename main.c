@@ -4,6 +4,15 @@
 
 //#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
 
+typedef struct {
+    // flags = [00000000]
+    // flags[7]: isNumber
+    // flags[1:0]: priority
+    char flags;
+    // content = "vetor de caracteres com tamanho alocado dinamicamente"
+    char* content;
+} EXPRESSION_ELEMENT;
+
 int hasSyntaxError(char exp[]) {
 
     if (exp[0] == '*' || exp[0] == '/' || 
@@ -73,7 +82,7 @@ int hasSyntaxError(char exp[]) {
 }
 
 char * addZeroToSpecialCases(char exp[]) {
-    
+
     int newExpSize = 1;
     char* newExp = (char*) calloc(1, sizeof(char));
 
@@ -116,8 +125,17 @@ char * addZeroToSpecialCases(char exp[]) {
     return newExp;
 }
 
-void transformCharToStruct(char vector) {
+void transformCharToStruct(char* exp) {
+    EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT *) calloc(1, sizeof(EXPRESSION_ELEMENT));
+    
 
+    int pos = 0;
+    while (exp[pos] != '\0')
+    {
+
+        pos++;
+    }
+    
 }
 
 void createRPNStack(/* recebe ponteiro pra pilha e array de structs */) {
@@ -128,14 +146,6 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
     // retorna resultado
 }
 
-typedef struct {
-    // flags = [00000000]
-    // flags[7]: isNumber
-    // flags[1:0]: priority
-    char flags;
-    // content = "vetor de caracteres com tamanho alocado dinamicamente"
-    char content[];
-} STACK_ELEMENT;
 
 int main() {
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
