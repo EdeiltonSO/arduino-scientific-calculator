@@ -73,3 +73,16 @@ shift (pra inversa das funções abaixo)
 - tratar sintax error pra press = com string vazia
 - tratar edge cases com indefinições
 - mapear tipos de erros possíveis
+
+## DOCUMENTAÇÃO
+
+### explicar as flags desse char
+
+typedef struct {
+    // flags = [00000000]
+    // flags[7]: isNumber
+    // flags[1:0]: priority
+    char flags;
+    // content = "vetor de caracteres com tamanho alocado dinamicamente"
+    char content[];
+} STACK_ELEMENT;
