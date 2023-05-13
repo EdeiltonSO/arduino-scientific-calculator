@@ -5,12 +5,14 @@
 //#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
 
 typedef struct {
-    // flags = [00000000]
-    // flags[7]: isNumber
-    // flags[1:0]: priority
-    char flags;
+    // priority == NULL -> numero
+    // priority != NULL -> operador
+    int priority; // 1 == mais alta
+
     // content = "vetor de caracteres com tamanho alocado dinamicamente"
-    char* content;
+    char* content; // melhor int mas pode ser operador
+
+    int fator_multiplicativo; // precisa?
 } EXPRESSION_ELEMENT;
 
 int hasSyntaxError(char exp[]) {
@@ -126,13 +128,15 @@ char * addZeroToSpecialCases(char exp[]) {
 }
 
 void transformCharToStruct(char* exp) {
-    EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT *) calloc(1, sizeof(EXPRESSION_ELEMENT));
-    
+    char*               newExp      = (char*)                calloc(1, sizeof(char));
+    EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT*) calloc(1, sizeof(EXPRESSION_ELEMENT));
+    // vetor de structs [{},{},{}]
 
     int pos = 0;
     while (exp[pos] != '\0')
     {
-
+        // .0123456789
+        // +-*/^()
         pos++;
     }
     
@@ -149,6 +153,8 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 int main() {
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
+    // int x = 23;
+    // printf("\n%d", x);
     printf("\nENTRADA: %s", input);
     printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
 
