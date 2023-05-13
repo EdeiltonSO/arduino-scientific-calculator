@@ -128,14 +128,24 @@ char * addZeroToSpecialCases(char exp[]) {
 }
 
 void transformCharToStruct(char* exp) {
-    char*               newExp      = (char*)                calloc(1, sizeof(char));
+    // char*            newExp      = (char*)               calloc(1, sizeof(char));
     EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT*) calloc(1, sizeof(EXPRESSION_ELEMENT));
     // vetor de structs [{},{},{}]
 
     int pos = 0;
+    int elementListQtd = 0;
+    char* temp;
     while (exp[pos] != '\0')
     {
         // .0123456789
+        if (exp[pos] >= '0' && exp[pos] <= '9') {
+            temp = (char *) realloc(temp, sizeof(char));
+            // enquanto tiver char de numero seguido, joga em temp, d
+            temp[0] = '0';
+            temp[1] = exp[0];
+            newExpSize += 2;
+        }
+
         // +-*/^()
         pos++;
     }
@@ -153,10 +163,10 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 int main() {
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
-    // int x = 23;
-    // printf("\n%d", x);
-    printf("\nENTRADA: %s", input);
-    printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
+    char zero = '7';
+    printf("\n%d", zero-48);
+    //printf("\nENTRADA: %s", input);
+    //printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
 
     return 0;
 }
