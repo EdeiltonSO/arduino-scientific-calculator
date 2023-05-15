@@ -134,19 +134,24 @@ void transformCharToStruct(char* exp) {
 
     int pos = 0;
     int elementListQtd = 0;
-    char* temp;
+    int sizeTemp = 1;
+    char* temp = (char*) calloc(sizeTemp, sizeof(char));
     while (exp[pos] != '\0')
     {
         // .0123456789
-        if (exp[pos] >= '0' && exp[pos] <= '9') {
-            temp = (char *) realloc(temp, sizeof(char));
-            // enquanto tiver char de numero seguido, joga em temp, d
-            temp[0] = '0';
-            temp[1] = exp[0];
-            newExpSize += 2;
+        if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
+            sizeTemp++;
+            temp = (char *) realloc(temp, sizeTemp);
+            temp[sizeTemp-2] = exp[pos];
+            temp[sizeTemp-1] = '\0';
         }
-
         // +-*/^()
+        else
+        {
+            /* code */
+        }
+        
+
         pos++;
     }
     
@@ -165,6 +170,7 @@ int main() {
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
     char zero = '7';
     printf("\n%d", zero-48);
+    printf(">>> %d", sizeof(int));
     //printf("\nENTRADA: %s", input);
     //printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
 
