@@ -148,7 +148,13 @@ void transformCharToStruct(char* exp) {
         // +-*/^()
         else
         {
-            /* code */
+            // pega o que tá em temp e cria um EXPRESSION_ELEMENT
+            // aloca espaço pra um novo elemento na elementList
+            // add o elemento na elementList
+            // libera a memória de temp a partir do segundo elemento
+            // pega o exp[pos] e cria um EXPRESSION_ELEMENT
+            // aloca espaço pra um novo elemento na elementList
+            // add o elemento na elementList
         }
         
 
