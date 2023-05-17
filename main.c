@@ -7,12 +7,17 @@
 typedef struct {
     // priority == NULL -> numero
     // priority != NULL -> operador
-    int priority; // 1 == mais alta
-
+    unsigned char priority:3; // 1 == mais alta
+    unsigned char decimal:1;
     // content = "vetor de caracteres com tamanho alocado dinamicamente"
-    char* content; // melhor int mas pode ser operador
-
-    int fator_multiplicativo; // precisa?
+    // int fator_multiplicativo; // precisa?
+    union
+    {
+        char op;
+        double num;
+        int num_int;
+    } content;
+    
 } EXPRESSION_ELEMENT;
 
 int hasSyntaxError(char exp[]) {
@@ -148,6 +153,14 @@ void transformCharToStruct(char* exp) {
         // +-*/^()
         else
         {
+            EXPRESSION_ELEMENT element;
+            element.content = temp;
+            element.priority = 0;
+
+            sizeTemp = 1;
+            temp = (char *) realloc(temp, sizeTemp);
+            temp[0] = '\0';
+
             // pega o que tá em temp e cria um EXPRESSION_ELEMENT
             // aloca espaço pra um novo elemento na elementList
             // add o elemento na elementList
@@ -157,7 +170,6 @@ void transformCharToStruct(char* exp) {
             // add o elemento na elementList
         }
         
-
         pos++;
     }
     
