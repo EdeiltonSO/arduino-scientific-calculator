@@ -9,13 +9,14 @@ typedef struct {
     // priority != NULL -> operador
     unsigned char priority:3; // 1 == mais alta
     unsigned char decimal:1;
+    //char flags; // [0 0000 000] => [decimal 0000 priority]
     // content = "vetor de caracteres com tamanho alocado dinamicamente"
     // int fator_multiplicativo; // precisa?
     union
     {
         char op;
-        double num;
-        int num_int;
+        double number_double;
+        int number_int;
     } content;
     
 } EXPRESSION_ELEMENT;
@@ -153,32 +154,57 @@ void transformCharToStruct(char* exp) {
         // +-*/^()
         else
         {
-            EXPRESSION_ELEMENT element;
-            // condicionais pra prioridade
-            if (exp[pos] == '(' || exp[pos] == ')')
-                element.priority = 1;
-            else if (exp[pos] == '^')
-                element.priority = 2;
-            else if (exp[pos] == '*' || exp[pos] == '/')
-                element.priority = 3;
-            else // + e -
-                element.priority = 4;
-            
-            // condicionais pro campo no union
-            // ...
+            EXPRESSION_ELEMENT number;
+            EXPRESSION_ELEMENT symbol;
 
+            // NUMBER
+
+            number.priority = 0;
+            number.decimal = 0;
+
+            int i = 0;
+            while (temp[i] != '\0')
+            {
+                if (temp[i] == '.')
+                {
+                    number.decimal = 1;
+                    break;
+                }
+                i++;
+            }
+
+            /*
+            if (number.decimal == 0b1)
+            {
+                number.content.number_double = temp;
+            }
+            else {
+                number.content.number_int = temp;
+            }
+            */
+            
+            
+            // libera a memória de temp a partir do segundo elemento
             sizeTemp = 1;
             temp = (char *) realloc(temp, sizeTemp);
             temp[0] = '\0';
 
-            // REAVALIAR ESSA LOGICA:
-            // pega o que tá em temp e cria um EXPRESSION_ELEMENT
-            // aloca espaço pra um novo elemento na elementList
-            // add o elemento na elementList
-            // libera a memória de temp a partir do segundo elemento
-            // pega o exp[pos] e cria um EXPRESSION_ELEMENT
-            // aloca espaço pra um novo elemento na elementList
-            // add o elemento na elementList
+            // SYMBOL (daqui pra baio ta supostamente ok)
+
+            symbol.decimal = 0;
+            symbol.content.op = exp[pos];
+            // mudar p/ switch case
+            if (exp[pos] == '(' || exp[pos] == ')')
+                symbol.priority = 1;
+            else if (exp[pos] == '^')
+                symbol.priority = 2;
+            else if (exp[pos] == '*' || exp[pos] == '/')
+                symbol.priority = 3;
+            else
+                symbol.priority = 4;
+
+            // alocar memoria e add os dois EXPRESSION_ELEMENT na elementList
+
         }
         
         pos++;
@@ -199,7 +225,7 @@ int main() {
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
     char zero = '7';
     printf("\n%d", zero-48);
-    printf(">>> %d", sizeof(int));
+    printf(">>> %d", sizeof(EXPRESSION_ELEMENT));
     //printf("\nENTRADA: %s", input);
     //printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
 
