@@ -154,13 +154,16 @@ void transformCharToStruct(char* exp) {
         else
         {
             EXPRESSION_ELEMENT element;
-            element.content = temp;
-            element.priority = 0;
+            // condicionais pra prioridade
+            // ...
+            // condicionais pro campo no union
+            // ...
 
             sizeTemp = 1;
             temp = (char *) realloc(temp, sizeTemp);
             temp[0] = '\0';
 
+            // REAVALIAR ESSA LOGICA:
             // pega o que tá em temp e cria um EXPRESSION_ELEMENT
             // aloca espaço pra um novo elemento na elementList
             // add o elemento na elementList
