@@ -60,6 +60,7 @@ shift (pra inversa das funções abaixo)
 - como implementar raízes de índice N?
 - trocar o botão clear por segurar o backspace?
 - preciso adicionar 0 **depois** de +, - e .?
+- **como o número 1.1.1 se comporta?**
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
