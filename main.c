@@ -155,7 +155,15 @@ void transformCharToStruct(char* exp) {
         {
             EXPRESSION_ELEMENT element;
             // condicionais pra prioridade
-            // ...
+            if (exp[pos] == '(' || exp[pos] == ')')
+                element.priority = 1;
+            else if (exp[pos] == '^')
+                element.priority = 2;
+            else if (exp[pos] == '*' || exp[pos] == '/')
+                element.priority = 3;
+            else // + e -
+                element.priority = 4;
+            
             // condicionais pro campo no union
             // ...
 
