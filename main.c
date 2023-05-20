@@ -4,21 +4,13 @@
 
 //#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
 
-typedef struct {
-    // priority == NULL -> numero
-    // priority != NULL -> operador
-    unsigned char priority:3; // 1 == mais alta
-    unsigned char decimal:1;
-    //char flags; // [0 0000 000] => [decimal 0000 priority]
-    // content = "vetor de caracteres com tamanho alocado dinamicamente"
-    // int fator_multiplicativo; // precisa?
-    union
-    {
+typedef struct EXPRESSION_ELEMENT {
+    char flags; // [0 0000 000] => [is_decimal 0000 priority]
+    union {
         char op;
         double number_double;
         int number_int;
     } content;
-    
 } EXPRESSION_ELEMENT;
 
 int hasSyntaxError(char exp[]) {
@@ -134,9 +126,8 @@ char * addZeroToSpecialCases(char exp[]) {
 }
 
 void transformCharToStruct(char* exp) {
-    // char*            newExp      = (char*)               calloc(1, sizeof(char));
+
     EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT*) calloc(1, sizeof(EXPRESSION_ELEMENT));
-    // vetor de structs [{},{},{}]
 
     int pos = 0;
     int elementListQtd = 0;
@@ -158,19 +149,24 @@ void transformCharToStruct(char* exp) {
             EXPRESSION_ELEMENT symbol;
 
             // NUMBER
-
-            number.priority = 0;
-            number.decimal = 0;
-
+            number.flags = 0b00000000;
             int i = 0;
             while (temp[i] != '\0')
             {
                 if (temp[i] == '.')
                 {
-                    number.decimal = 1;
+                    printf("aaaaaaaaaaa");
+                    number.flags = 0b10000000;
                     break;
                 }
                 i++;
+            }
+
+            if(number.flags |= (1 << 7)) {
+                printf("\neh decimal");
+            }
+            else {
+                printf("\nnao eh decimal");
             }
 
             /*
@@ -191,17 +187,18 @@ void transformCharToStruct(char* exp) {
 
             // SYMBOL (daqui pra baio ta supostamente ok)
 
-            symbol.decimal = 0;
-            symbol.content.op = exp[pos];
+            // symbol.decimal = 0;
+            // symbol.content.op = exp[pos];
             // mudar p/ switch case
-            if (exp[pos] == '(' || exp[pos] == ')')
-                symbol.priority = 1;
-            else if (exp[pos] == '^')
-                symbol.priority = 2;
-            else if (exp[pos] == '*' || exp[pos] == '/')
-                symbol.priority = 3;
-            else
-                symbol.priority = 4;
+
+            // if (exp[pos] == '(' || exp[pos] == ')')
+            //     symbol.priority = 1;
+            // else if (exp[pos] == '^')
+            //     symbol.priority = 2;
+            // else if (exp[pos] == '*' || exp[pos] == '/')
+            //     symbol.priority = 3;
+            // else
+            //     symbol.priority = 4;
 
             // alocar memoria e add os dois EXPRESSION_ELEMENT na elementList
 
@@ -223,9 +220,13 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 int main() {
     char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
+    char test[] = "0.5";
+
     char zero = '7';
-    printf("\n%d", zero-48);
-    printf(">>> %d", sizeof(EXPRESSION_ELEMENT));
+    transformCharToStruct("9+5");
+    //printf("\n%d", zero-48);
+    //printf(">>> %d", sizeof(EXPRESSION_ELEMENT));
+
     //printf("\nENTRADA: %s", input);
     //printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
 
