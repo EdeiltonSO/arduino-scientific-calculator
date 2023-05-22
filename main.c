@@ -7,7 +7,7 @@
 typedef struct EXPRESSION_ELEMENT {
     unsigned char flags; // [0 0000 000] => is_decimal[7] <not_used>[6:3] priority[2:0]
     union {
-        unsigned char symbol_char;
+        char symbol_char;
         double number_double;
         int number_int;
     } content;
@@ -127,6 +127,8 @@ char * addZeroToSpecialCases(char exp[]) {
 
 void transformCharToStruct(char* exp) {
 
+    printf("\n%s", exp);
+
     int elementListSize = 0;
     EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
 
@@ -154,10 +156,10 @@ void transformCharToStruct(char* exp) {
 
         }
         // +-*/^
-        else if (exp[pos] == '(' || exp[pos] == ')')
+        else
         {
-            printf("\n>>> %s", currentNumber);
-            printf("\n>>> %c", exp[pos]);
+            // printf("\n>>> %s", currentNumber);
+            // printf("\n>>> %c", exp[pos]);
 
             // NUMBER
 
@@ -176,12 +178,12 @@ void transformCharToStruct(char* exp) {
             }
 
             if(number.flags & 1 << 7) {
-                printf("\neh decimal");
+                // printf("\neh decimal");
                 // converter de string pra double
                 number.content.number_double = 0.0;
             }
             else {
-                printf("\nnao eh decimal");
+                // printf("\nnao eh decimal");
                 // converter de string pra int
                 number.content.number_int = 0;
             }
@@ -230,7 +232,7 @@ void transformCharToStruct(char* exp) {
     // se sobrar
     if (currentNumber[0] != '\0')
     {
-        printf("\n>>> %s", currentNumber);
+        // printf("\n>>> %s", currentNumber);
         EXPRESSION_ELEMENT number;
         number.flags = 0;
 
@@ -246,12 +248,12 @@ void transformCharToStruct(char* exp) {
         }
 
         if(number.flags & 1 << 7) {
-            printf("\neh decimal");
+            // printf("\neh decimal");
             // converter de string pra double
             number.content.number_double = 0.0;
         }
         else {
-            printf("\nnao eh decimal");
+            // printf("\nnao eh decimal");
             // converter de string pra int
             number.content.number_int = 0;
         }
@@ -273,14 +275,14 @@ void transformCharToStruct(char* exp) {
     printf("\n-----\n");
     for (int i = 0; i < elementListSize; i++)
     {
-        printf("%d ", elementList[i].flags);
+        // printf("%d ", elementList[i].flags);
         
-        // if (elementList[i].flags == 0)
-        //     printf("[i:%d]", elementList[i].content.number_int);
-        // else if (elementList[i].flags == 0x80)
-        //     printf("[f:%f]", elementList[i].content.number_double);
-        // else
-        //     printf("[c:%c]", elementList[i].content.symbol_char);
+        if (elementList[i].flags == 0)
+            printf("%d", elementList[i].content.number_int);
+        else if (elementList[i].flags == 0x80)
+            printf("%f", elementList[i].content.number_double);
+        else
+            printf("%c", elementList[i].content.symbol_char);
     }
     printf("\n-----\n");
     
@@ -300,7 +302,7 @@ int main() {
     char test[] = "0.5";
 
     char zero = '7';
-    transformCharToStruct("9345.67+124*(444.5)");
+    transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
     //printf("\n%d", zero-48);
     //printf(">>> %d", sizeof(EXPRESSION_ELEMENT));
 
