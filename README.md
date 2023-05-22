@@ -12,7 +12,7 @@
 - [ ] receber entrada
 - [x] checar erros de sintaxe
 - [x] add 0 antes dos +, - e . que precisarem
-- [ ] explodir a string
+- [x] explodir a string
 - [ ] converter em vetor de structs
 - [ ] jogar structs numa pilha RPN
 - [ ] resolver a pilha em RPN
