@@ -84,11 +84,13 @@ shift (pra inversa das funções abaixo)
 
 ### explicar as flags desse char
 
-typedef struct {
-    // flags = [00000000]
-    // flags[7]: isNumber
-    // flags[1:0]: priority
-    char flags;
-    // content = "vetor de caracteres com tamanho alocado dinamicamente"
-    char content[];
-} STACK_ELEMENT;
+```c
+typedef struct EXPRESSION_ELEMENT {
+    unsigned char flags; // [0 0000 000] => is_decimal[7] <not_used>[6:3] priority[2:0]
+    union {
+        char symbol_char;
+        double number_double;
+        int number_int;
+    } content;
+} EXPRESSION_ELEMENT;
+```
