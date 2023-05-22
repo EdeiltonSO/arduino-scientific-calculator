@@ -44,6 +44,8 @@ string explodida:
 
 `>>> 23 teclas até aqui`
 
+### Funções
+
 shift (pra inversa das funções abaixo)
 - raiz
 - sen
@@ -55,12 +57,15 @@ shift (pra inversa das funções abaixo)
 `>>> 30 teclas até aqui`
 
 ## Pontos pra análise
-- como responder entradas vazias?
 - como alternar entre graus e radianos?
 - como implementar raízes de índice N?
 - trocar o botão clear por segurar o backspace?
 - preciso adicionar 0 **depois** de +, - e .?
-- **como o número 1.1.1 se comporta?**
+
+## Issues
+- ignorar tentativas de cálculo de entradas vazias
+- tratar a entrada de números que parecem endereços IP
+- verificar e tratar zeros à esquerda nos números
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
@@ -69,7 +74,7 @@ shift (pra inversa das funções abaixo)
 
 ## Melhorias futuras
 - permitir que o usuário calcule "1(1+1)"
-- permitir que o usuário calcule ".1" completando com zero
+- permitir que o usuário calcule ".1" completando com zero (done)
 - permitir que o usuário calcule "1+-+++---+-1"
 - tratar sintax error pra press = com string vazia
 - tratar edge cases com indefinições
