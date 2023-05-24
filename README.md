@@ -28,7 +28,7 @@ string explodida:
 
 ## HARDWARE
 
-### Teclas
+### Para implementação na versão atual
 
 - on/off: chave (direto no vcc)
 
@@ -44,7 +44,7 @@ string explodida:
 
 `>>> 23 teclas até aqui`
 
-### Funções
+### Para implementação em versão futura
 
 shift (pra inversa das funções abaixo)
 - raiz
