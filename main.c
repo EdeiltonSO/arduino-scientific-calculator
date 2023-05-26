@@ -146,6 +146,54 @@ void transformCharToStruct(char* exp) {
         }
         // ()
         else if (exp[pos] == '(' || exp[pos] == ')') {
+
+            // se for fechamento e tiver currentNumber
+            // então insere ele antes de fechar o parêntese
+            // solução provisória na gambiarra abaixo
+
+            // INICIO DO CODIGO REPETIDO GAMBIARRA FEIA HORROROSA
+
+            if (currentNumber[0] != '\0' && exp[pos] == ')')
+            {
+                // printf("\n>>> %s", currentNumber);
+                EXPRESSION_ELEMENT number;
+                number.flags = 0;
+
+                int i = 0;
+                while (currentNumber[i] != '\0')
+                {
+                    if (currentNumber[i] == '.')
+                    {
+                        number.flags = 0x80;
+                        break;
+                    }
+                    i++;
+                }
+
+                if(number.flags & 1 << 7) {
+                    // printf("\neh decimal");
+                    // converter de string pra double
+                    number.content.number_double = 0.0;
+                }
+                else {
+                    // printf("\nnao eh decimal");
+                    // converter de string pra int
+                    number.content.number_int = 0;
+                }
+                
+                elementListSize++;
+                if (elementListSize > 1) elementList = (EXPRESSION_ELEMENT*) 
+                    realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elementList[elementListSize-1] = number;
+
+                // reseta currentNumber pra proxima iteração
+                currentNumberLength = 1;
+                currentNumber = (char *) realloc(currentNumber, currentNumberLength);
+                currentNumber[0] = '\0';
+            }
+
+            // FIM DO CODIGO REPETIDO GAMBIARRA FEIA HORROROSA
+
             EXPRESSION_ELEMENT symbol;
             symbol.flags = 1;
             symbol.content.symbol_char = exp[pos];
@@ -230,45 +278,7 @@ void transformCharToStruct(char* exp) {
     }
 
     // se sobrar
-    if (currentNumber[0] != '\0')
-    {
-        // printf("\n>>> %s", currentNumber);
-        EXPRESSION_ELEMENT number;
-        number.flags = 0;
-
-        int i = 0;
-        while (currentNumber[i] != '\0')
-        {
-            if (currentNumber[i] == '.')
-            {
-                number.flags = 0x80;
-                break;
-            }
-            i++;
-        }
-
-        if(number.flags & 1 << 7) {
-            // printf("\neh decimal");
-            // converter de string pra double
-            number.content.number_double = 0.0;
-        }
-        else {
-            // printf("\nnao eh decimal");
-            // converter de string pra int
-            number.content.number_int = 0;
-        }
-        
-        elementListSize++;
-        if (elementListSize > 1) elementList = (EXPRESSION_ELEMENT*) 
-            realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-        elementList[elementListSize-1] = number;
-
-        // reseta currentNumber pra proxima iteração
-        currentNumberLength = 1;
-        currentNumber = (char *) realloc(currentNumber, currentNumberLength);
-        currentNumber[0] = '\0';
-    }
-
+    
 
     free(currentNumber);
 
