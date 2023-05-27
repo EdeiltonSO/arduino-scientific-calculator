@@ -13,117 +13,8 @@ typedef struct EXPRESSION_ELEMENT {
     } content;
 } EXPRESSION_ELEMENT;
 
-int hasSyntaxError(char exp[]) {
-
-    if (exp[0] == '*' || exp[0] == '/' || 
-        exp[0] == '^' || exp[0] == ')' || 
-        exp[0] == '\0') return 1;
-
-    int pos = 1;
-    int openedBrackets = 0;
-    while (exp[pos] != '\0') {
-
-        if (exp[pos] >= '0' && exp[pos] <= '9' &&
-        (exp[pos-1] == ')' || exp[pos+1] == '(')
-        ) return 1;
-        
-        else if (exp[pos] == '.'
-        && (exp[pos+1] < '0' || exp[pos+1] > '9')
-        ) return 1;
-
-        else if (exp[pos] == '+' || exp[pos] == '-')
-        {
-            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
-            && (exp[pos-1] < '(' || exp[pos-1] > ')')
-            || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && (exp[pos+1] != '(')
-            ) return 1;
-        }
-
-        else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
-        {
-            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
-            && (exp[pos-1] != ')')
-            || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && (exp[pos+1] != '(')
-            ) return 1;
-        }
-
-        else if (exp[pos] == '(')
-        {
-            openedBrackets++;
-            if (exp[pos-1] != '+' && exp[pos-1] != '-'
-            && exp[pos-1] != '*' && exp[pos-1] != '/'
-            && exp[pos-1] != '^' && exp[pos-1] != '('
-            || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && exp[pos+1] != '+' && exp[pos+1] != '-'
-            && exp[pos+1] != '('
-            ) return 1;
-        }
-
-        else if (exp[pos] == ')')
-        {
-            openedBrackets--;
-            if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
-            || exp[pos+1] != '+' && exp[pos+1] != '-'
-            && exp[pos+1] != '*' && exp[pos+1] != '/'
-            && exp[pos+1] != '^' && exp[pos+1] != ')'
-            ) return 1;
-        }
-
-        if (exp[pos+1] == '\0'
-            && (exp[pos] < '0' || exp[pos] > '9')
-            && exp[pos] != ')')return 1;
-
-        pos++;
-    }
-
-    return openedBrackets ? 1 : 0;
-}
-
-char * addZeroToSpecialCases(char exp[]) {
-
-    int newExpSize = 1;
-    char* newExp = (char*) calloc(1, sizeof(char));
-
-    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
-    {
-        newExp = (char *) realloc(newExp, newExpSize+2);
-        newExp[0] = '0';
-        newExp[1] = exp[0];
-        newExp[2] = '\0';
-        newExpSize += 2;
-    }
-    else {
-        newExp = (char *) realloc(newExp, newExpSize+1);
-        newExp[0] = exp[0];
-        newExp[1] = '\0';
-        newExpSize += 1;
-    }
-
-    int pos = 1;
-    while (exp[pos] != '\0') {
-        if (((exp[pos] == '+' || exp[pos] == '-') 
-        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
-        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
-        {
-            newExp = (char *) realloc(newExp, newExpSize+2);
-            newExp[newExpSize-1] = '0';
-            newExp[newExpSize] = exp[pos];
-            newExp[newExpSize+1] = '\0';
-            newExpSize += 2;
-        }
-        else 
-        {
-            newExp = (char *) realloc(newExp, newExpSize+1);
-            newExp[newExpSize-1] = exp[pos];
-            newExp[newExpSize] = '\0';
-            newExpSize += 1;
-        }
-        pos++;
-    }
-    return newExp;
-}
+int hasSyntaxError(char *);
+char * addZeroToSpecialCases(char *);
 
 void transformCharToStruct(char* exp) {
 
@@ -155,7 +46,6 @@ void transformCharToStruct(char* exp) {
 
             if (currentNumber[0] != '\0' && exp[pos] == ')')
             {
-                // printf("\n>>> %s", currentNumber);
                 EXPRESSION_ELEMENT number;
                 number.flags = 0;
 
@@ -320,4 +210,133 @@ int main() {
     //printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
 
     return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// FUNÇÕES PRONTAS
+
+int hasSyntaxError(char exp[]) {
+
+    if (exp[0] == '*' || exp[0] == '/' || 
+        exp[0] == '^' || exp[0] == ')' || 
+        exp[0] == '\0') return 1;
+
+    int pos = 1;
+    int openedBrackets = 0;
+    while (exp[pos] != '\0') {
+
+        if (exp[pos] >= '0' && exp[pos] <= '9' &&
+        (exp[pos-1] == ')' || exp[pos+1] == '(')
+        ) return 1;
+        
+        else if (exp[pos] == '.'
+        && (exp[pos+1] < '0' || exp[pos+1] > '9')
+        ) return 1;
+
+        else if (exp[pos] == '+' || exp[pos] == '-')
+        {
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
+            && (exp[pos-1] < '(' || exp[pos-1] > ')')
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && (exp[pos+1] != '(')
+            ) return 1;
+        }
+
+        else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
+        {
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
+            && (exp[pos-1] != ')')
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && (exp[pos+1] != '(')
+            ) return 1;
+        }
+
+        else if (exp[pos] == '(')
+        {
+            openedBrackets++;
+            if (exp[pos-1] != '+' && exp[pos-1] != '-'
+            && exp[pos-1] != '*' && exp[pos-1] != '/'
+            && exp[pos-1] != '^' && exp[pos-1] != '('
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && exp[pos+1] != '+' && exp[pos+1] != '-'
+            && exp[pos+1] != '('
+            ) return 1;
+        }
+
+        else if (exp[pos] == ')')
+        {
+            openedBrackets--;
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
+            || exp[pos+1] != '+' && exp[pos+1] != '-'
+            && exp[pos+1] != '*' && exp[pos+1] != '/'
+            && exp[pos+1] != '^' && exp[pos+1] != ')'
+            ) return 1;
+        }
+
+        if (exp[pos+1] == '\0'
+            && (exp[pos] < '0' || exp[pos] > '9')
+            && exp[pos] != ')')return 1;
+
+        pos++;
+    }
+
+    return openedBrackets ? 1 : 0;
+}
+
+char * addZeroToSpecialCases(char exp[]) {
+
+    int newExpSize = 1;
+    char* newExp = (char*) calloc(1, sizeof(char));
+
+    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
+    {
+        newExp = (char *) realloc(newExp, newExpSize+2);
+        newExp[0] = '0';
+        newExp[1] = exp[0];
+        newExp[2] = '\0';
+        newExpSize += 2;
+    }
+    else {
+        newExp = (char *) realloc(newExp, newExpSize+1);
+        newExp[0] = exp[0];
+        newExp[1] = '\0';
+        newExpSize += 1;
+    }
+
+    int pos = 1;
+    while (exp[pos] != '\0') {
+        if (((exp[pos] == '+' || exp[pos] == '-') 
+        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
+        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
+        {
+            newExp = (char *) realloc(newExp, newExpSize+2);
+            newExp[newExpSize-1] = '0';
+            newExp[newExpSize] = exp[pos];
+            newExp[newExpSize+1] = '\0';
+            newExpSize += 2;
+        }
+        else 
+        {
+            newExp = (char *) realloc(newExp, newExpSize+1);
+            newExp[newExpSize-1] = exp[pos];
+            newExp[newExpSize] = '\0';
+            newExpSize += 1;
+        }
+        pos++;
+    }
+    return newExp;
 }
