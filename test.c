@@ -264,6 +264,16 @@ void transformCharToStruct(char* exp) {
                 // printf("\nnao eh decimal");
                 // converter de string pra int
                 number.content.number_int = 0;
+
+
+                printf("?");
+                for (int mult = 1, i = currentNumberLength; i <= 0; mult *= 10, i--)
+                {
+                    printf("cadeeeee");
+                    number.content.number_int += (currentNumber[i]-48)*mult;                
+                }
+                
+
             }
             
             elementListSize++;
