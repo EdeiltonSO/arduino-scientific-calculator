@@ -25,7 +25,7 @@ void transformCharToStruct(char* exp) {
 
     int pos = 0;
     int currentNumberLength = 1;
-    char* currentNumber = (char*) malloc(sizeof(char));
+    char* currentNumber = (char*) calloc(1, sizeof(char));
 
     while (exp[pos] != '\0') {
         // .0123456789
