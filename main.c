@@ -19,13 +19,13 @@ typedef struct {
 int hasSyntaxError(char *);
 char * addZeroToSpecialCases(char *);
 
-ELEMENT_LIST* transformCharToStruct(char* exp) {
+ELEMENT_LIST transformCharToStruct(char* exp) {
 
     printf("\nENTRADA: %s", exp);
 
     int elementListSize = 0;
     EXPRESSION_ELEMENT* elements = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
-    ELEMENT_LIST* elementList = (ELEMENT_LIST*) malloc(sizeof(ELEMENT_LIST));
+    ELEMENT_LIST elementList;
 
     int pos = 0;
     int currentNumberLength = 1;
@@ -128,8 +128,8 @@ ELEMENT_LIST* transformCharToStruct(char* exp) {
     }
     printf("\n-----");
     
-    elementList->list = elements;
-    elementList->sizeOfList = elementListSize;
+    elementList.list = elements;
+    elementList.sizeOfList = elementListSize;
     return elementList;
 }
 
@@ -145,9 +145,9 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 int main() {
     // char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
 
-    ELEMENT_LIST* x = transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
+    ELEMENT_LIST x = transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
 
-    printf("\nNUMERO DE ELEMENTOS: %d\n", x->sizeOfList);
+    printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
 
     return 0;
 }
