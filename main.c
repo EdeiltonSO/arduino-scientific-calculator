@@ -13,15 +13,21 @@ typedef struct {
     } content;
 } EXPRESSION_ELEMENT;
 
+typedef struct {
+    int sizeOfList;
+    EXPRESSION_ELEMENT* list;
+} ELEMENT_LIST;
+
 int hasSyntaxError(char *);
 char * addZeroToSpecialCases(char *);
 
-void transformCharToStruct(char* exp) {
+ELEMENT_LIST* transformCharToStruct(char* exp) {
 
     printf("\n%s", exp);
 
     int elementListSize = 0;
-    EXPRESSION_ELEMENT* elementList = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
+    EXPRESSION_ELEMENT* elements = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
+    ELEMENT_LIST* elementList = (ELEMENT_LIST*) malloc(sizeof(ELEMENT_LIST));
 
     int pos = 0;
     int currentNumberLength = 1;
@@ -63,9 +69,9 @@ void transformCharToStruct(char* exp) {
                 }
                 
                 elementListSize++;
-                if (elementListSize > 1) elementList = (EXPRESSION_ELEMENT*) 
-                    realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elementList[elementListSize-1] = number;
+                if (elementListSize > 1) elements = (EXPRESSION_ELEMENT*) 
+                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elements[elementListSize-1] = number;
 
                 // reseta currentNumber pra proxima iteração
                 currentNumberLength = 1;
@@ -73,20 +79,16 @@ void transformCharToStruct(char* exp) {
                 currentNumber[0] = '\0';
             }
 
-            // -----------------------------------------------
-
-            // ()
             if (exp[pos] == '(' || exp[pos] == ')') {
                 EXPRESSION_ELEMENT symbol;
                 symbol.flags = 1;
                 symbol.content.symbol_char = exp[pos];
 
                 elementListSize++;
-                elementList = (EXPRESSION_ELEMENT*) realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elementList[elementListSize-1] = symbol;
+                elements = (EXPRESSION_ELEMENT*) realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elements[elementListSize-1] = symbol;
             }
-            // +-*/^
-            else
+            else // +-*/^
             {
                 EXPRESSION_ELEMENT symbol;
 
@@ -109,9 +111,9 @@ void transformCharToStruct(char* exp) {
                 }
 
                 elementListSize++;
-                elementList = (EXPRESSION_ELEMENT*) 
-                    realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elementList[elementListSize-1] = symbol;
+                elements = (EXPRESSION_ELEMENT*) 
+                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elements[elementListSize-1] = symbol;
             }
 
             // -----------------------------------------------
@@ -123,18 +125,19 @@ void transformCharToStruct(char* exp) {
 
     printf("\n-----\n");
     for (int i = 0; i < elementListSize; i++)
-    {
-        // printf("%d ", elementList[i].flags);
-        
-        if (elementList[i].flags == 0)
-            printf("%d", elementList[i].content.number_int);
-        else if (elementList[i].flags == 0x80)
-            printf("%f", elementList[i].content.number_double);
+    {        
+        if (elements[i].flags == 0)
+            printf("%d", elements[i].content.number_int);
+        else if (elements[i].flags == 0x80)
+            printf("%f", elements[i].content.number_double);
         else
-            printf("%c", elementList[i].content.symbol_char);
+            printf("%c", elements[i].content.symbol_char);
     }
     printf("\n-----\n");
     
+    elementList->list = elements;
+    elementList->sizeOfList = elementListSize;
+    return elementList;
 }
 
 void createRPNStack(/* recebe ponteiro pra pilha e array de structs */) {
@@ -151,7 +154,8 @@ int main() {
     char test[] = "0.5";
 
     char zero = '7';
-    transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
+    ELEMENT_LIST* x = transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
+    printf("\n<<< %d >>>\n", x->sizeOfList);
     //printf("\n%d", zero-48);
     //printf(">>> %d", sizeof(EXPRESSION_ELEMENT));
 
