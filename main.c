@@ -2,10 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
-
 typedef struct {
-    unsigned char flags; // [0 0000 000] => is_decimal[7] <not_used>[6:3] priority[2:0]
+    unsigned char flags;
     union {
         char symbol_char;
         double number_double;
@@ -23,7 +21,7 @@ char * addZeroToSpecialCases(char *);
 
 ELEMENT_LIST* transformCharToStruct(char* exp) {
 
-    printf("\n%s", exp);
+    printf("\nENTRADA: %s", exp);
 
     int elementListSize = 0;
     EXPRESSION_ELEMENT* elements = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
@@ -58,13 +56,11 @@ ELEMENT_LIST* transformCharToStruct(char* exp) {
                 }
 
                 if(number.flags & 1 << 7) {
-                    // printf("\neh decimal");
-                    // converter de string pra double
+                    // converter currentNumber pra double e salvar na linha abaixo
                     number.content.number_double = 0.0;
                 }
                 else {
-                    // printf("\nnao eh decimal");
-                    // converter de string pra int
+                    // converter currentNumber pra int e salvar na linha abaixo
                     number.content.number_int = 0;
                 }
                 
@@ -115,15 +111,12 @@ ELEMENT_LIST* transformCharToStruct(char* exp) {
                     realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
                 elements[elementListSize-1] = symbol;
             }
-
-            // -----------------------------------------------
         }
-
         pos++;        
     }
     free(currentNumber);
 
-    printf("\n-----\n");
+    printf("\n-----\nSAIDA: ");
     for (int i = 0; i < elementListSize; i++)
     {        
         if (elements[i].flags == 0)
@@ -133,7 +126,7 @@ ELEMENT_LIST* transformCharToStruct(char* exp) {
         else
             printf("%c", elements[i].content.symbol_char);
     }
-    printf("\n-----\n");
+    printf("\n-----");
     
     elementList->list = elements;
     elementList->sizeOfList = elementListSize;
@@ -150,17 +143,11 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 
 int main() {
-    char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
-    char test[] = "0.5";
+    // char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
 
-    char zero = '7';
     ELEMENT_LIST* x = transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
-    printf("\n<<< %d >>>\n", x->sizeOfList);
-    //printf("\n%d", zero-48);
-    //printf(">>> %d", sizeof(EXPRESSION_ELEMENT));
 
-    //printf("\nENTRADA: %s", input);
-    //printf("\nSAIDA:   %s\n\n", addZeroToSpecialCases(input));
+    printf("\nNUMERO DE ELEMENTOS: %d\n", x->sizeOfList);
 
     return 0;
 }
