@@ -4,7 +4,7 @@
 
 //#define ENTRADA "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20"
 
-typedef struct EXPRESSION_ELEMENT {
+typedef struct {
     unsigned char flags; // [0 0000 000] => is_decimal[7] <not_used>[6:3] priority[2:0]
     union {
         char symbol_char;
@@ -35,17 +35,8 @@ void transformCharToStruct(char* exp) {
             currentNumber[currentNumberLength-2] = exp[pos];
             currentNumber[currentNumberLength-1] = '\0';
         }
-        // ()
-        else if (exp[pos] == '(' || exp[pos] == ')') {
-
-            // se for fechamento e tiver currentNumber
-            // então insere ele antes de fechar o parêntese
-            // solução provisória na gambiarra abaixo
-
-            // INICIO DO CODIGO REPETIDO GAMBIARRA FEIA HORROROSA
-
-            if (currentNumber[0] != '\0' && exp[pos] == ')')
-            {
+        else {
+            if (currentNumber[0] != '\0') {
                 EXPRESSION_ELEMENT number;
                 number.flags = 0;
 
@@ -82,94 +73,52 @@ void transformCharToStruct(char* exp) {
                 currentNumber[0] = '\0';
             }
 
-            // FIM DO CODIGO REPETIDO GAMBIARRA FEIA HORROROSA
+            // -----------------------------------------------
 
-            EXPRESSION_ELEMENT symbol;
-            symbol.flags = 1;
-            symbol.content.symbol_char = exp[pos];
+            // ()
+            if (exp[pos] == '(' || exp[pos] == ')') {
+                EXPRESSION_ELEMENT symbol;
+                symbol.flags = 1;
+                symbol.content.symbol_char = exp[pos];
 
-            elementListSize++;
-            elementList = (EXPRESSION_ELEMENT*) realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-            elementList[elementListSize-1] = symbol;
-
-        }
-        // +-*/^
-        else
-        {
-            // printf("\n>>> %s", currentNumber);
-            // printf("\n>>> %c", exp[pos]);
-
-            // NUMBER
-
-            EXPRESSION_ELEMENT number;
-
-            number.flags = 0;
-            int i = 0;
-            while (currentNumber[i] != '\0')
+                elementListSize++;
+                elementList = (EXPRESSION_ELEMENT*) realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elementList[elementListSize-1] = symbol;
+            }
+            // +-*/^
+            else
             {
-                if (currentNumber[i] == '.')
+                EXPRESSION_ELEMENT symbol;
+
+                symbol.flags = 0;
+                symbol.content.symbol_char = exp[pos];
+                
+                switch (exp[pos])
                 {
-                    number.flags = 0b10000000;
+                case '^':
+                    symbol.flags |= 1 << 1;
+                    break;
+                case '*':
+                case '/':
+                    symbol.flags |= 1 << 1;
+                    symbol.flags |= 1 << 0;
+                    break;
+                default:
+                    symbol.flags |= 1 << 2;
                     break;
                 }
-                i++;
+
+                elementListSize++;
+                elementList = (EXPRESSION_ELEMENT*) 
+                    realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elementList[elementListSize-1] = symbol;
             }
 
-            if(number.flags & 1 << 7) {
-                // printf("\neh decimal");
-                // converter de string pra double
-                number.content.number_double = 0.0;
-            }
-            else {
-                // printf("\nnao eh decimal");
-                // converter de string pra int
-                number.content.number_int = 0;
-            }
-            
-            elementListSize++;
-
-            if (elementListSize > 1) elementList = (EXPRESSION_ELEMENT*) 
-                realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-            elementList[elementListSize-1] = number;
-
-            // reseta currentNumber pra proxima iteração
-            currentNumberLength = 1;
-            currentNumber = (char *) realloc(currentNumber, currentNumberLength);
-            currentNumber[0] = '\0';
-
-            // SYMBOL
-
-            EXPRESSION_ELEMENT symbol;
-
-            symbol.flags = 0;
-            symbol.content.symbol_char = exp[pos];
-            
-            switch (exp[pos])
-            {
-            case '^':
-                symbol.flags |= 1 << 1;
-                break;
-            case '*':
-            case '/':
-                symbol.flags |= 1 << 1;
-                symbol.flags |= 1 << 0;
-                break;
-            default:
-                symbol.flags |= 1 << 2;
-                break;
-            }
-
-            elementListSize++;
-            elementList = (EXPRESSION_ELEMENT*) 
-                realloc(elementList, elementListSize * sizeof(EXPRESSION_ELEMENT));
-            elementList[elementListSize-1] = symbol;
+            // -----------------------------------------------
         }
+
         pos++;        
     }
-
-    // se sobrar
-    
-
     free(currentNumber);
 
     printf("\n-----\n");
@@ -211,6 +160,31 @@ int main() {
 
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
