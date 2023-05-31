@@ -63,9 +63,10 @@ shift (pra inversa das funções abaixo)
 - preciso adicionar 0 **depois** de +, - e .?
 
 ## Issues
-- ignorar tentativas de cálculo de entradas vazias
 - tratar a entrada de números que parecem endereços IP
 - verificar e tratar zeros à esquerda nos números
+- limitar a entrada de mais de 6 casas decimais após a vírgula (?)
+- tratar edge cases com indefinições
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
@@ -74,10 +75,9 @@ shift (pra inversa das funções abaixo)
 
 ## Melhorias futuras
 - permitir que o usuário calcule "1(1+1)"
-- permitir que o usuário calcule ".1" completando com zero (done)
-- permitir que o usuário calcule "1+-+++---+-1"
-- tratar sintax error pra press = com string vazia
-- tratar edge cases com indefinições
+- ~~permitir que o usuário calcule ".1" completando com zero~~ (done)
+- ~~permitir que o usuário calcule "1+-+++---+-1"~~ (pensando bem, pra quê?)
+- tratar sintax error pra press = com string vazia (ignorar tentativa)
 - mapear tipos de erros possíveis
 
 ## DOCUMENTAÇÃO
@@ -93,4 +93,13 @@ typedef struct EXPRESSION_ELEMENT {
         int number_int;
     } content;
 } EXPRESSION_ELEMENT;
+```
+
+### explicar essa estrutura
+
+```c
+typedef struct {
+    int sizeOfList;
+    EXPRESSION_ELEMENT* list;
+} ELEMENT_LIST;
 ```
