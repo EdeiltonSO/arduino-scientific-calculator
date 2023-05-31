@@ -56,11 +56,11 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
 
                 if(number.flags & 1 << 7) {
                     // converter currentNumber pra double e salvar na linha abaixo
-                    number.content.number_double = 0.0;
+                    number.content.number_double = atof(currentNumber);
                 }
                 else {
                     // converter currentNumber pra int e salvar na linha abaixo
-                    number.content.number_int = 0;
+                    number.content.number_int = atoi(currentNumber);
                 }
                 
                 elementListSize++;
@@ -144,7 +144,7 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 int main() {
     // char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
 
-    ELEMENT_LIST x = transformCharToStruct("(1.23+456)-789*444.5/(1^2)");
+    ELEMENT_LIST x = transformCharToStruct("(1.9999999+456)-789*444.5/(1^2)");
 
     printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
 
