@@ -30,13 +30,13 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 
 int main() {
-    // char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
+    char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
 
     ELEMENT_LIST x = transformCharToStruct("(1.9999999+456)-789*444.5/(1^2)");
 
     printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
 
-    printf(">>> %d", hasSyntaxError("1."));
+    printf(">>> %d", hasSyntaxError(input));
 
     return 0;
 }
@@ -89,8 +89,8 @@ int hasSyntaxError(char exp[]) {
         exp[0] == '^' || exp[0] == ')' || 
         exp[0] == '\0') return 1;
 
-    int pos = 1;
-    int openedBrackets = 0;
+    char pos = 1;
+    char openedBrackets = 0;
     while (exp[pos] != '\0') {
 
         if (exp[pos] >= '0' && exp[pos] <= '9' &&
