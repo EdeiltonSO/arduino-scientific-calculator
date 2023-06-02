@@ -64,11 +64,12 @@ shift (pra inversa das funções abaixo)
 - o tamanho do lado esquerdo do float é um problema a ser resolvido?
 
 ## Issues
-- tratar a entrada de números que parecem endereços IP
-- verificar e tratar zeros à esquerda nos números
+- tratar a entrada de números que parecem endereços IP (gerar sintax error)
+- ~~verificar e tratar zeros à esquerda nos números~~ tratado por atoi e atof
 - limitar a entrada de mais de 6 casas decimais após a vírgula (?)
 - tratar edge cases com indefinições
-- tratar limitação do inteiro
+- limitação do inteiro (a cada operação, verificar se o resultado excede o limte de tamanho?)
+- parênteses na primeira e na última posição não estão sendo aceitos
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
