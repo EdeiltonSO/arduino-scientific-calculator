@@ -57,16 +57,18 @@ shift (pra inversa das funções abaixo)
 `>>> 30 teclas até aqui`
 
 ## Pontos pra análise
-- como alternar entre graus e radianos?
-- como implementar raízes de índice N?
 - trocar o botão clear por segurar o backspace?
-- preciso adicionar 0 **depois** de +, - e .?
+- ~~preciso adicionar 0 **depois** de +, - e .?~~ precisa, já foi tratado
+- ~~number_int é suficientemente grande?~~ agora é
+- como limitar a entrada de inteiros maiores que o permitido?
+- o tamanho do lado esquerdo do float é um problema a ser resolvido?
 
 ## Issues
 - tratar a entrada de números que parecem endereços IP
 - verificar e tratar zeros à esquerda nos números
 - limitar a entrada de mais de 6 casas decimais após a vírgula (?)
 - tratar edge cases com indefinições
+- tratar limitação do inteiro
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
@@ -78,7 +80,10 @@ shift (pra inversa das funções abaixo)
 - ~~permitir que o usuário calcule ".1" completando com zero~~ (done)
 - ~~permitir que o usuário calcule "1+-+++---+-1"~~ (pensando bem, pra quê?)
 - tratar sintax error pra press = com string vazia (ignorar tentativa)
-- mapear tipos de erros possíveis
+- ler um float com "qualquer" precisão e calcular como notação científica
+- mapear erros possíveis e separar em categorias (return 1, return 2, etc)
+- alternar entre graus e radianos (quando tiver função trigonométrica)
+- implementar raízes de índice N
 
 ## DOCUMENTAÇÃO
 
@@ -103,3 +108,5 @@ typedef struct {
     EXPRESSION_ELEMENT* list;
 } ELEMENT_LIST;
 ```
+
+### explicar limitação de 6 casas decimais para float
