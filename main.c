@@ -6,133 +6,21 @@ typedef struct {
     union {
         char symbol_char;
         double number_double;
-        int number_int;
+        unsigned long int number_int;
     } content;
 } EXPRESSION_ELEMENT;
 
 typedef struct {
-    int sizeOfList;
+    char sizeOfList;
     EXPRESSION_ELEMENT* list;
 } ELEMENT_LIST;
 
 int hasSyntaxError(char *);
 char * addZeroToSpecialCases(char *);
+ELEMENT_LIST transformCharToStruct(char *);
 
-ELEMENT_LIST transformCharToStruct(char* exp) {
+void createRPNStack(/* recebe array de structs e retorna ponteiro pra pilha */) {
 
-    printf("\nENTRADA: %s", exp);
-
-    int elementListSize = 0;
-    EXPRESSION_ELEMENT* elements = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
-    ELEMENT_LIST elementList;
-
-    int pos = 0;
-    int currentNumberLength = 1;
-    char* currentNumber = (char*) calloc(1, sizeof(char));
-
-    while (exp[pos] != '\0') {
-        // .0123456789
-        if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
-            currentNumberLength++;
-            currentNumber = (char *) realloc(currentNumber, currentNumberLength);
-            currentNumber[currentNumberLength-2] = exp[pos];
-            currentNumber[currentNumberLength-1] = '\0';
-        }
-        else {
-            if (currentNumber[0] != '\0') {
-                EXPRESSION_ELEMENT number;
-                number.flags = 0;
-
-                int i = 0;
-                while (currentNumber[i] != '\0')
-                {
-                    if (currentNumber[i] == '.')
-                    {
-                        number.flags = 0x80;
-                        break;
-                    }
-                    i++;
-                }
-
-                if(number.flags & 1 << 7) {
-                    // converter currentNumber pra double e salvar na linha abaixo
-                    number.content.number_double = atof(currentNumber);
-                }
-                else {
-                    // converter currentNumber pra int e salvar na linha abaixo
-                    number.content.number_int = atoi(currentNumber);
-                }
-                
-                elementListSize++;
-                if (elementListSize > 1) elements = (EXPRESSION_ELEMENT*) 
-                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elements[elementListSize-1] = number;
-
-                // reseta currentNumber pra proxima iteração
-                currentNumberLength = 1;
-                currentNumber = (char *) realloc(currentNumber, currentNumberLength);
-                currentNumber[0] = '\0';
-            }
-
-            if (exp[pos] == '(' || exp[pos] == ')') {
-                EXPRESSION_ELEMENT symbol;
-                symbol.flags = 1;
-                symbol.content.symbol_char = exp[pos];
-
-                elementListSize++;
-                elements = (EXPRESSION_ELEMENT*) realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elements[elementListSize-1] = symbol;
-            }
-            else // +-*/^
-            {
-                EXPRESSION_ELEMENT symbol;
-
-                symbol.flags = 0;
-                symbol.content.symbol_char = exp[pos];
-                
-                switch (exp[pos])
-                {
-                case '^':
-                    symbol.flags |= 1 << 1;
-                    break;
-                case '*':
-                case '/':
-                    symbol.flags |= 1 << 1;
-                    symbol.flags |= 1 << 0;
-                    break;
-                default:
-                    symbol.flags |= 1 << 2;
-                    break;
-                }
-
-                elementListSize++;
-                elements = (EXPRESSION_ELEMENT*) 
-                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elements[elementListSize-1] = symbol;
-            }
-        }
-        pos++;        
-    }
-    free(currentNumber);
-
-    printf("\n-----\nSAIDA: ");
-    for (int i = 0; i < elementListSize; i++)
-    {        
-        if (elements[i].flags == 0)
-            printf("%d", elements[i].content.number_int);
-        else if (elements[i].flags == 0x80)
-            printf("%f", elements[i].content.number_double);
-        else
-            printf("%c", elements[i].content.symbol_char);
-    }
-    printf("\n-----");
-    
-    elementList.list = elements;
-    elementList.sizeOfList = elementListSize;
-    return elementList;
-}
-
-void createRPNStack(/* recebe ponteiro pra pilha e array de structs */) {
     // retorna status positivo se a pilha foi preenchida
 }
 
@@ -147,6 +35,8 @@ int main() {
     ELEMENT_LIST x = transformCharToStruct("(1.9999999+456)-789*444.5/(1^2)");
 
     printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
+
+    printf(">>> %d", hasSyntaxError("1."));
 
     return 0;
 }
@@ -303,4 +193,99 @@ char * addZeroToSpecialCases(char exp[]) {
         pos++;
     }
     return newExp;
+}
+
+ELEMENT_LIST transformCharToStruct(char* exp) {
+    int elementListSize = 0;
+    EXPRESSION_ELEMENT* elements = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
+    ELEMENT_LIST elementList;
+
+    int pos = 0;
+    int currentNumberLength = 1;
+    char* currentNumber = (char*) calloc(1, sizeof(char));
+
+    while (exp[pos] != '\0') {
+        // .0123456789
+        if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
+            currentNumberLength++;
+            currentNumber = (char *) realloc(currentNumber, currentNumberLength);
+            currentNumber[currentNumberLength-2] = exp[pos];
+            currentNumber[currentNumberLength-1] = '\0';
+        }
+        else {
+            if (currentNumber[0] != '\0') {
+                EXPRESSION_ELEMENT number;
+                number.flags = 0;
+
+                int i = 0;
+                while (currentNumber[i] != '\0')
+                {
+                    if (currentNumber[i] == '.')
+                    {
+                        number.flags = 0x80;
+                        break;
+                    }
+                    i++;
+                }
+
+                if(number.flags & 1 << 7)
+                    number.content.number_double = atof(currentNumber);
+                else
+                    number.content.number_int = atol(currentNumber);
+                -
+                elementListSize++;
+                if (elementListSize > 1) elements = (EXPRESSION_ELEMENT*) 
+                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elements[elementListSize-1] = number;
+
+                // reseta currentNumber pra proxima iteração
+                currentNumberLength = 1;
+                currentNumber = (char *) realloc(currentNumber, currentNumberLength);
+                currentNumber[0] = '\0';
+            }
+
+            if (exp[pos] == '(' || exp[pos] == ')') {
+                EXPRESSION_ELEMENT symbol;
+                symbol.flags = 1;
+                symbol.content.symbol_char = exp[pos];
+
+                elementListSize++;
+                elements = (EXPRESSION_ELEMENT*) realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elements[elementListSize-1] = symbol;
+            }
+            else // +-*/^
+            {
+                EXPRESSION_ELEMENT symbol;
+
+                symbol.flags = 0;
+                symbol.content.symbol_char = exp[pos];
+                
+                switch (exp[pos])
+                {
+                case '^':
+                    symbol.flags |= 1 << 1;
+                    break;
+                case '*':
+                case '/':
+                    symbol.flags |= 1 << 1;
+                    symbol.flags |= 1 << 0;
+                    break;
+                default:
+                    symbol.flags |= 1 << 2;
+                    break;
+                }
+
+                elementListSize++;
+                elements = (EXPRESSION_ELEMENT*) 
+                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
+                elements[elementListSize-1] = symbol;
+            }
+        }
+        pos++;        
+    }
+    free(currentNumber);
+    
+    elementList.list = elements;
+    elementList.sizeOfList = elementListSize;
+    return elementList;
 }
