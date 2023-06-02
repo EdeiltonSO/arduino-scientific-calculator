@@ -13,7 +13,7 @@
 - [x] checar erros de sintaxe
 - [x] add 0 antes dos +, - e . que precisarem
 - [x] explodir a string
-- [ ] converter em vetor de structs
+- [x] converter em vetor de structs (avaliar uso de atoi e atof)
 - [ ] jogar structs numa pilha RPN
 - [ ] resolver a pilha em RPN
 - [ ] formatar dado de saída
