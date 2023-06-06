@@ -6,7 +6,7 @@ int hasSyntaxError(char *);
 int main() {
     // char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
 
-    printf(">>> %d", hasSyntaxError("1+1+1.1.1+1"));
+    printf(">>> %d", hasSyntaxError("0.1+1+1.1+2.45654"));
 
     return 0;
 }
@@ -54,6 +54,7 @@ int main() {
 // FUNÇÕES PRONTAS
 
 int hasSyntaxError(char exp[]) {
+    printf("%s\n", exp);
 
     if (exp[0] == '*' || exp[0] == '/' || 
         exp[0] == '^' || exp[0] == ')' || 
@@ -64,6 +65,12 @@ int hasSyntaxError(char exp[]) {
     char dotsOfCurrentNumber = 0;
 
     while (exp[pos] != '\0') {
+        if (exp[pos] == '.') {
+            dotsOfCurrentNumber++;
+            if (dotsOfCurrentNumber > 1) return 1;
+        }
+        else
+            if (exp[pos] < '0' || exp[pos] > '9') dotsOfCurrentNumber = 0;
 
         if (exp[pos] >= '0' && exp[pos] <= '9' &&
         (exp[pos-1] == ')' || exp[pos+1] == '(')
@@ -73,18 +80,9 @@ int hasSyntaxError(char exp[]) {
         && (exp[pos+1] < '0' || exp[pos+1] > '9')
         ) return 1;
 
-        else if (exp[pos] == '.') {
-
-            dotsOfCurrentNumber++; // PAREI AQUI MAS NAO TA FUNCIONANDO AINDA
-
-            // VEJA AÍ.
-
-            if (exp[pos+1] < '0' || exp[pos+1] > '9') return 1;
-        }
-
         else if (exp[pos] == '+' || exp[pos] == '-')
         {
-            dotsOfCurrentNumber = 0;
+            //dotsOfCurrentNumber = 0;
             if ((exp[pos-1] < '0' || exp[pos-1] > '9')
             && (exp[pos-1] < '(' || exp[pos-1] > ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
@@ -94,7 +92,7 @@ int hasSyntaxError(char exp[]) {
 
         else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
         {
-            dotsOfCurrentNumber = 0;
+            //dotsOfCurrentNumber = 0;
             if ((exp[pos-1] < '0' || exp[pos-1] > '9')
             && (exp[pos-1] != ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
@@ -105,7 +103,7 @@ int hasSyntaxError(char exp[]) {
         else if (exp[pos] == '(')
         {
             openedBrackets++;
-            dotsOfCurrentNumber = 0;
+            //dotsOfCurrentNumber = 0;
             if (exp[pos-1] != '+' && exp[pos-1] != '-'
             && exp[pos-1] != '*' && exp[pos-1] != '/'
             && exp[pos-1] != '^' && exp[pos-1] != '('
@@ -118,7 +116,7 @@ int hasSyntaxError(char exp[]) {
         else if (exp[pos] == ')')
         {
             openedBrackets--;
-            dotsOfCurrentNumber = 0;
+            //dotsOfCurrentNumber = 0;
             if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
             || exp[pos+1] != '+' && exp[pos+1] != '-'
             && exp[pos+1] != '*' && exp[pos+1] != '/'
@@ -133,6 +131,5 @@ int hasSyntaxError(char exp[]) {
         pos++;
     }
 
-    printf("\ndotsOfCurrentNumber: %d\n", dotsOfCurrentNumber);
-    return (openedBrackets && (dotsOfCurrentNumber > 1)) ? 1 : 0;
+    return openedBrackets ? 1 : 0;
 }
