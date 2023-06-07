@@ -84,6 +84,7 @@ int main() {
 // FUNÇÕES PRONTAS
 
 int hasSyntaxError(char exp[]) {
+    printf("%s\n", exp);
 
     if (exp[0] == '*' || exp[0] == '/' || 
         exp[0] == '^' || exp[0] == ')' || 
@@ -91,7 +92,15 @@ int hasSyntaxError(char exp[]) {
 
     char pos = 1;
     char openedBrackets = 0;
+    char dotsOfCurrentNumber = 0;
+
     while (exp[pos] != '\0') {
+        if (exp[pos] == '.') {
+            dotsOfCurrentNumber++;
+            if (dotsOfCurrentNumber > 1) return 1;
+        }
+        else
+            if (exp[pos] < '0' || exp[pos] > '9') dotsOfCurrentNumber = 0;
 
         if (exp[pos] >= '0' && exp[pos] <= '9' &&
         (exp[pos-1] == ')' || exp[pos+1] == '(')
@@ -143,7 +152,7 @@ int hasSyntaxError(char exp[]) {
 
         if (exp[pos+1] == '\0'
             && (exp[pos] < '0' || exp[pos] > '9')
-            && exp[pos] != ')')return 1;
+            && exp[pos] != ')') return 1;
 
         pos++;
     }
