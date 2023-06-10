@@ -49,19 +49,20 @@ shift (pra inversa das funções abaixo)
 `>>> 30 teclas até aqui`
 
 ## Pontos pra análise
-- trocar o botão clear por segurar o backspace?
 - ~~preciso adicionar 0 **depois** de +, - e .?~~ precisa, já foi tratado
 - ~~number_int é suficientemente grande?~~ agora é
+- trocar o botão clear por segurar o backspace?
 - como limitar a entrada de inteiros maiores que o permitido?
 - o tamanho do lado esquerdo do float é um problema a ser resolvido?
+- limitar a entrada de mais de 6 casas decimais após a vírgula?
 
 ## Issues
 - ~~tratar a entrada de números que parecem endereços IP~~ retorna sintax error
 - ~~verificar e tratar zeros à esquerda nos números~~ tratado por atoi e atof
-- limitar a entrada de mais de 6 casas decimais após a vírgula (?)
-- tratar edge cases com indefinições
-- limitação do inteiro (a cada operação, verificar se o resultado excede o limite de tamanho?)
 - ~~parênteses na primeira e na última posição não estão sendo aceitos~~ agora estão
+- [stackSolver] tratar edge cases com indefinições
+- [stackSolver] tratar limitação do double (usar notação científica?)
+- [stackSolver] tratar limitação do inteiro (a cada operação, verificar se o resultado excede o limite de representação do tipo?)
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)
@@ -69,13 +70,13 @@ shift (pra inversa das funções abaixo)
 - por enquanto sem função pra integral definida
 
 ## Melhorias futuras
-- permitir que o usuário calcule "1(1+1)"
 - ~~permitir que o usuário calcule ".1" completando com zero~~ (done)
 - ~~permitir que o usuário calcule "1+-+++---+-1"~~ (pensando bem, pra quê?)
 - tratar sintax error pra press = com string vazia (ignorar tentativa)
 - ler um float com "qualquer" precisão e calcular como notação científica
 - mapear erros possíveis e separar em categorias (return 1, return 2, etc)
 - alternar entre graus e radianos (quando tiver função trigonométrica)
+- permitir que o usuário calcule "1(1+1)"
 - implementar raízes de índice N
 
 ## DOCUMENTAÇÃO

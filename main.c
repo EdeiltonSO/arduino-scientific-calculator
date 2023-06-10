@@ -20,7 +20,6 @@ char * addZeroToSpecialCases(char *);
 ELEMENT_LIST transformCharToStruct(char *);
 
 void createRPNStack(/* recebe array de structs e retorna ponteiro pra pilha */) {
-
     // retorna status positivo se a pilha foi preenchida
 }
 
@@ -28,15 +27,12 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
     // retorna resultado
 }
 
-
 int main() {
     char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20)";
 
-    ELEMENT_LIST x = transformCharToStruct("(1.9999999+456)-789*444.5/(1^2)");
+    ELEMENT_LIST x = transformCharToStruct(input);
 
     printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
-
-    printf(">>> %d", hasSyntaxError(input));
 
     return 0;
 }
@@ -44,8 +40,6 @@ int main() {
 // FUNÇÕES PRONTAS
 
 int hasSyntaxError(char exp[]) {
-    printf("%s\n", exp);
-
     char pos = 1;
     char openedBrackets = 0;
     char dotsOfCurrentNumber = 0;
@@ -71,7 +65,6 @@ int hasSyntaxError(char exp[]) {
         else if (exp[pos] == '.'
         && (exp[pos+1] < '0' || exp[pos+1] > '9')
         ) return 1;
-
 
         else if (exp[pos] == '+' || exp[pos] == '-')
         {
