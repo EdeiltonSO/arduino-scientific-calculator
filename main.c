@@ -19,8 +19,19 @@ int hasSyntaxError(char *);
 char * addZeroToSpecialCases(char *);
 ELEMENT_LIST transformCharToStruct(char *);
 
-void createRPNStack(/* recebe array de structs e retorna ponteiro pra pilha */) {
-    // retorna status positivo se a pilha foi preenchida
+void createRPNStack(ELEMENT_LIST elementList) {
+    for (int i = 0; i < elementList.sizeOfList; i++)
+    {
+        EXPRESSION_ELEMENT element = elementList.list[i];
+        unsigned char flags = element.flags;
+
+        if(flags & 1 << 7)
+            printf("%f\n", element.content.number_double);
+        else if (!(flags | 0))
+            printf("%d\n", element.content.number_int);
+        else 
+            printf("%c\n", element.content.symbol_char);
+    }
 }
 
 void stackSolver(/* recebe ponteiro pra pilha */) {
@@ -32,7 +43,8 @@ int main() {
 
     ELEMENT_LIST x = transformCharToStruct(input);
 
-    printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
+    createRPNStack(x);
+    // printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
 
     return 0;
 }
