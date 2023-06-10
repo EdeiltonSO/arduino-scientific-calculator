@@ -6,7 +6,7 @@ int hasSyntaxError(char *);
 int main() {
     // char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
 
-    printf(">>> %d", hasSyntaxError("0.1+1+1.1+2.45654"));
+    printf(">>> %d", hasSyntaxError("(0.1+1+1.1+2.45654)"));
 
     return 0;
 }
@@ -56,14 +56,16 @@ int main() {
 int hasSyntaxError(char exp[]) {
     printf("%s\n", exp);
 
-    if (exp[0] == '*' || exp[0] == '/' || 
-        exp[0] == '^' || exp[0] == ')' || 
-        exp[0] == '\0') return 1;
-
     char pos = 1;
     char openedBrackets = 0;
     char dotsOfCurrentNumber = 0;
 
+    if (exp[0] == '*' || exp[0] == '/' || 
+        exp[0] == '^' || exp[0] == ')' || 
+        exp[0] == '\0') return 1;
+
+    if (exp[0] == '(') openedBrackets++;
+    
     while (exp[pos] != '\0') {
         if (exp[pos] == '.') {
             dotsOfCurrentNumber++;
@@ -120,7 +122,8 @@ int hasSyntaxError(char exp[]) {
             if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
             || exp[pos+1] != '+' && exp[pos+1] != '-'
             && exp[pos+1] != '*' && exp[pos+1] != '/'
-            && exp[pos+1] != '^' && exp[pos+1] != ')'
+            && exp[pos+1] != '^' && exp[pos+1] != ')' 
+            && exp[pos+1] != '\0'
             ) return 1;
         }
 
@@ -131,5 +134,6 @@ int hasSyntaxError(char exp[]) {
         pos++;
     }
 
+    printf("\nopBr: %d\n", openedBrackets);
     return openedBrackets ? 1 : 0;
 }

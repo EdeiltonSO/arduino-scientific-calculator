@@ -18,14 +18,6 @@
 - [ ] resolver a pilha em RPN
 - [ ] formatar dado de saída
 
-```
-string validada:
--5+35.9+42*56/(74-(5^2+9)*2)-20
-
-string explodida:
-['-', '5', '+', '35.9', '+', '42', '*', '56', '/', '(', '74', '-', '(', '5', '^', '2', '+', '9', ')', '*', '2', ')', '-', '20']
-```
-
 ## HARDWARE
 
 ### Para implementação na versão atual
@@ -69,7 +61,7 @@ shift (pra inversa das funções abaixo)
 - limitar a entrada de mais de 6 casas decimais após a vírgula (?)
 - tratar edge cases com indefinições
 - limitação do inteiro (a cada operação, verificar se o resultado excede o limite de tamanho?)
-- parênteses na primeira e na última posição não estão sendo aceitos
+- ~~parênteses na primeira e na última posição não estão sendo aceitos~~ agora estão
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)

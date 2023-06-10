@@ -30,7 +30,7 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 
 int main() {
-    char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20";
+    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20)";
 
     ELEMENT_LIST x = transformCharToStruct("(1.9999999+456)-789*444.5/(1^2)");
 
@@ -41,58 +41,20 @@ int main() {
     return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // FUNÇÕES PRONTAS
 
 int hasSyntaxError(char exp[]) {
     printf("%s\n", exp);
 
+    char pos = 1;
+    char openedBrackets = 0;
+    char dotsOfCurrentNumber = 0;
+
     if (exp[0] == '*' || exp[0] == '/' || 
         exp[0] == '^' || exp[0] == ')' || 
         exp[0] == '\0') return 1;
 
-    char pos = 1;
-    char openedBrackets = 0;
-    char dotsOfCurrentNumber = 0;
+    if (exp[0] == '(') openedBrackets++;
 
     while (exp[pos] != '\0') {
         if (exp[pos] == '.') {
@@ -110,12 +72,13 @@ int hasSyntaxError(char exp[]) {
         && (exp[pos+1] < '0' || exp[pos+1] > '9')
         ) return 1;
 
+
         else if (exp[pos] == '+' || exp[pos] == '-')
         {
             if ((exp[pos-1] < '0' || exp[pos-1] > '9')
             && (exp[pos-1] < '(' || exp[pos-1] > ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && (exp[pos+1] != '(')
+            && exp[pos+1] != '(' && exp[pos+1] != '.'
             ) return 1;
         }
 
@@ -136,7 +99,7 @@ int hasSyntaxError(char exp[]) {
             && exp[pos-1] != '^' && exp[pos-1] != '('
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
             && exp[pos+1] != '+' && exp[pos+1] != '-'
-            && exp[pos+1] != '('
+            && exp[pos+1] != '(' && exp[pos+1] != '.'
             ) return 1;
         }
 
@@ -147,6 +110,7 @@ int hasSyntaxError(char exp[]) {
             || exp[pos+1] != '+' && exp[pos+1] != '-'
             && exp[pos+1] != '*' && exp[pos+1] != '/'
             && exp[pos+1] != '^' && exp[pos+1] != ')'
+            && exp[pos+1] != '\0'
             ) return 1;
         }
 
