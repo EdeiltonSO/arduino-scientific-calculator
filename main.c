@@ -11,7 +11,7 @@ typedef struct {
 } EXPRESSION_ELEMENT;
 
 typedef struct {
-    char sizeOfList;
+    char size;
     EXPRESSION_ELEMENT* list;
 } ELEMENT_LIST;
 
@@ -20,13 +20,13 @@ char * addZeroToSpecialCases(char *);
 ELEMENT_LIST transformCharToStruct(char *);
 
 void createRPNStack(ELEMENT_LIST elementList) {
-    for (int i = 0; i < elementList.sizeOfList; i++)
+    for (int i = 0; i < elementList.size; i++)
     {
         EXPRESSION_ELEMENT element = elementList.list[i];
         unsigned char flags = element.flags;
 
         if(flags & 1 << 7)
-            printf("%f\n", element.content.number_double);
+            printf("%lf\n", element.content.number_double);
         else if (!(flags | 0))
             printf("%d\n", element.content.number_int);
         else 
@@ -39,12 +39,10 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 }
 
 int main() {
-    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2))-20)";
+    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20)";
 
     ELEMENT_LIST x = transformCharToStruct(input);
-
     createRPNStack(x);
-    // printf("\nNUMERO DE ELEMENTOS: %d\n", x.sizeOfList);
 
     return 0;
 }
@@ -132,18 +130,18 @@ int hasSyntaxError(char exp[]) {
 char * addZeroToSpecialCases(char exp[]) {
 
     int newExpSize = 1;
-    char* newExp = (char*) calloc(1, sizeof(char));
+    char* newExp = calloc(1, sizeof(char));
 
     if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
     {
-        newExp = (char *) realloc(newExp, newExpSize+2);
+        newExp = realloc(newExp, newExpSize+2);
         newExp[0] = '0';
         newExp[1] = exp[0];
         newExp[2] = '\0';
         newExpSize += 2;
     }
     else {
-        newExp = (char *) realloc(newExp, newExpSize+1);
+        newExp = realloc(newExp, newExpSize+1);
         newExp[0] = exp[0];
         newExp[1] = '\0';
         newExpSize += 1;
@@ -155,7 +153,7 @@ char * addZeroToSpecialCases(char exp[]) {
         && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
         || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
         {
-            newExp = (char *) realloc(newExp, newExpSize+2);
+            newExp = realloc(newExp, newExpSize+2);
             newExp[newExpSize-1] = '0';
             newExp[newExpSize] = exp[pos];
             newExp[newExpSize+1] = '\0';
@@ -163,7 +161,7 @@ char * addZeroToSpecialCases(char exp[]) {
         }
         else 
         {
-            newExp = (char *) realloc(newExp, newExpSize+1);
+            newExp = realloc(newExp, newExpSize+1);
             newExp[newExpSize-1] = exp[pos];
             newExp[newExpSize] = '\0';
             newExpSize += 1;
@@ -174,19 +172,19 @@ char * addZeroToSpecialCases(char exp[]) {
 }
 
 ELEMENT_LIST transformCharToStruct(char* exp) {
-    int elementListSize = 0;
-    EXPRESSION_ELEMENT* elements = (EXPRESSION_ELEMENT*) malloc(sizeof(EXPRESSION_ELEMENT));
     ELEMENT_LIST elementList;
+    elementList.list = malloc(sizeof(EXPRESSION_ELEMENT));
+    elementList.size = 0;
 
     int pos = 0;
     int currentNumberLength = 1;
-    char* currentNumber = (char*) calloc(1, sizeof(char));
+    char* currentNumber = calloc(1, sizeof(char));
 
     while (exp[pos] != '\0') {
         // .0123456789
         if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
             currentNumberLength++;
-            currentNumber = (char *) realloc(currentNumber, currentNumberLength);
+            currentNumber = realloc(currentNumber, currentNumberLength);
             currentNumber[currentNumberLength-2] = exp[pos];
             currentNumber[currentNumberLength-1] = '\0';
         }
@@ -211,14 +209,13 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 else
                     number.content.number_int = atol(currentNumber);
                 -
-                elementListSize++;
-                if (elementListSize > 1) elements = (EXPRESSION_ELEMENT*) 
-                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elements[elementListSize-1] = number;
+                elementList.size++;
+                if (elementList.size > 1) elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+                elementList.list[elementList.size-1] = number;
 
                 // reseta currentNumber pra proxima iteração
                 currentNumberLength = 1;
-                currentNumber = (char *) realloc(currentNumber, currentNumberLength);
+                currentNumber = realloc(currentNumber, currentNumberLength);
                 currentNumber[0] = '\0';
             }
 
@@ -227,9 +224,9 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 symbol.flags = 1;
                 symbol.content.symbol_char = exp[pos];
 
-                elementListSize++;
-                elements = (EXPRESSION_ELEMENT*) realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elements[elementListSize-1] = symbol;
+                elementList.size++;
+                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+                elementList.list[elementList.size-1] = symbol;
             }
             else // +-*/^
             {
@@ -253,17 +250,14 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                     break;
                 }
 
-                elementListSize++;
-                elements = (EXPRESSION_ELEMENT*) 
-                    realloc(elements, elementListSize * sizeof(EXPRESSION_ELEMENT));
-                elements[elementListSize-1] = symbol;
+                elementList.size++;
+                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+                elementList.list[elementList.size-1] = symbol;
             }
         }
         pos++;        
     }
     free(currentNumber);
     
-    elementList.list = elements;
-    elementList.sizeOfList = elementListSize;
     return elementList;
 }
