@@ -12,6 +12,7 @@ typedef struct {
 
 typedef struct {
     char size;
+    char stackSize;
     EXPRESSION_ELEMENT* list;
 } ELEMENT_LIST;
 
@@ -20,6 +21,8 @@ char * addZeroToSpecialCases(char *);
 ELEMENT_LIST transformCharToStruct(char *);
 
 void createRPNStack(ELEMENT_LIST elementList) {
+    printf("tamanho da lista: %i\ntamanho da pilha: %i\n", elementList.size, elementList.stackSize);
+
     for (int i = 0; i < elementList.size; i++)
     {
         EXPRESSION_ELEMENT element = elementList.list[i];
@@ -31,6 +34,7 @@ void createRPNStack(ELEMENT_LIST elementList) {
             printf("%d\n", element.content.number_int);
         else 
             printf("%c\n", element.content.symbol_char);
+
     }
 }
 
@@ -174,6 +178,7 @@ char * addZeroToSpecialCases(char exp[]) {
 ELEMENT_LIST transformCharToStruct(char* exp) {
     ELEMENT_LIST elementList;
     elementList.list = malloc(sizeof(EXPRESSION_ELEMENT));
+    elementList.stackSize = 0;
     elementList.size = 0;
 
     int pos = 0;
@@ -208,8 +213,10 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                     number.content.number_double = atof(currentNumber);
                 else
                     number.content.number_int = atol(currentNumber);
-                -
+
                 elementList.size++;
+                elementList.stackSize++;
+
                 if (elementList.size > 1) elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
                 elementList.list[elementList.size-1] = number;
 
@@ -234,6 +241,7 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
 
                 symbol.flags = 0;
                 symbol.content.symbol_char = exp[pos];
+                elementList.stackSize++;
                 
                 switch (exp[pos])
                 {
@@ -258,6 +266,5 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
         pos++;        
     }
     free(currentNumber);
-    
     return elementList;
 }
