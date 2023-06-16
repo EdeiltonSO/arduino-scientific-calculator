@@ -12,7 +12,8 @@ typedef struct {
 
 typedef struct {
     char size;
-    char stackSize;
+    char RPNExpSize;
+    char symbolStackSize;
     EXPRESSION_ELEMENT* list;
 } ELEMENT_LIST;
 
@@ -20,22 +21,33 @@ int hasSyntaxError(char *);
 char * addZeroToSpecialCases(char *);
 ELEMENT_LIST transformCharToStruct(char *);
 
-void createRPNStack(ELEMENT_LIST elementList) {
-    printf("tamanho da lista: %i\ntamanho da pilha: %i\n", elementList.size, elementList.stackSize);
+void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
+    printf("tamanho da lista: %i\ntamanho da pilha: %i\n", input.size, input.RPNExpSize);
 
-    for (int i = 0; i < elementList.size; i++)
+    EXPRESSION_ELEMENT symbolStack[input.symbolStackSize];
+    char symbolStackSize = 0;
+    char outputSize = 0;
+
+    for (int pos = 0; pos < input.size; pos++)
     {
-        EXPRESSION_ELEMENT element = elementList.list[i];
+        EXPRESSION_ELEMENT element = input.list[pos];
         unsigned char flags = element.flags;
 
-        if(flags & 1 << 7)
-            printf("%lf\n", element.content.number_double);
-        else if (!(flags | 0))
-            printf("%d\n", element.content.number_int);
-        else 
-            printf("%c\n", element.content.symbol_char);
-
+        // trocar essa e outras condicionais por diretivas define
+        if(!(flags | 0 << 2) && !(flags | 0 << 1) && !(flags | 0 << 0))
+        {
+            // processa numeros conforme lógica da RPN
+        }
+        else
+        {
+            // processa simbolo conforme lógica da RPN usando symbolStack
+        }
     }
+
+    // pegar o último elemento do vetor output e add uma flag
+    // informando que aquele é o último elemento da lista
+    // a próxima função usa esse vetor e itera nele
+    // até detectar essa flag
 }
 
 void stackSolver(/* recebe ponteiro pra pilha */) {
@@ -44,9 +56,30 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 int main() {
     char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20)";
+    char exp[] = "3.5*15/(3+2)^2-1";
 
-    ELEMENT_LIST x = transformCharToStruct(input);
-    createRPNStack(x);
+    ELEMENT_LIST structuredExp = transformCharToStruct(input);
+    EXPRESSION_ELEMENT stack[structuredExp.RPNExpSize];
+
+    createRPNStack(structuredExp, stack);
+
+    // ---------------------------------
+
+    printf("expressao original: %s\n", input);
+    printf("caracteres da expressao original: %d\n", strlen(input));
+    printf("tamanho da expressao original: %d\n", structuredExp.size);
+    printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
+    printf("tamanho da pilha de simbolos:  %d\n", structuredExp.symbolStackSize);
+
+    for (int i = 0; i < structuredExp.size; i++)
+    {
+        EXPRESSION_ELEMENT element = structuredExp.list[i];
+        unsigned char flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%d ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
 
     return 0;
 }
@@ -178,7 +211,8 @@ char * addZeroToSpecialCases(char exp[]) {
 ELEMENT_LIST transformCharToStruct(char* exp) {
     ELEMENT_LIST elementList;
     elementList.list = malloc(sizeof(EXPRESSION_ELEMENT));
-    elementList.stackSize = 0;
+    elementList.symbolStackSize = 0;
+    elementList.RPNExpSize = 0;
     elementList.size = 0;
 
     int pos = 0;
@@ -215,7 +249,7 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                     number.content.number_int = atol(currentNumber);
 
                 elementList.size++;
-                elementList.stackSize++;
+                elementList.RPNExpSize++;
 
                 if (elementList.size > 1) elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
                 elementList.list[elementList.size-1] = number;
@@ -234,6 +268,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 elementList.size++;
                 elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
                 elementList.list[elementList.size-1] = symbol;
+
+                if(exp[pos] == '(') elementList.symbolStackSize++;
             }
             else // +-*/^
             {
@@ -241,7 +277,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
 
                 symbol.flags = 0;
                 symbol.content.symbol_char = exp[pos];
-                elementList.stackSize++;
+                elementList.symbolStackSize++;
+                elementList.RPNExpSize++;
                 
                 switch (exp[pos])
                 {
