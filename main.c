@@ -261,7 +261,7 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
 
             if (exp[pos] == '(' || exp[pos] == ')') {
                 EXPRESSION_ELEMENT symbol;
-                symbol.flags = 1;
+                symbol.flags = 0b00000100;
                 symbol.content.symbol_char = exp[pos];
 
                 elementList.size++;
@@ -283,14 +283,14 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 {
                 case '^':
                     symbol.flags |= 1 << 1;
+                    symbol.flags |= 1 << 0;
                     break;
                 case '*':
                 case '/':
                     symbol.flags |= 1 << 1;
-                    symbol.flags |= 1 << 0;
                     break;
                 default:
-                    symbol.flags |= 1 << 2;
+                    symbol.flags |= 1 << 0;
                     break;
                 }
 
