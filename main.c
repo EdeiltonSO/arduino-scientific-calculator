@@ -33,67 +33,14 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         EXPRESSION_ELEMENT element = input.list[pos];
         unsigned char flags = element.flags;
 
-        // printf("%d\n", flags);
         // trocar essa e outras condicionais por diretivas define
-        if(!(flags & 0b00000111)) // se for número
+        if(!(flags | 0 << 2) && !(flags | 0 << 1) && !(flags | 0 << 0))
         {
-            printf("# ");
-            output[outputSize] = input.list[pos];
-            outputSize++;
+            // processa numeros conforme lógica da RPN
         }
         else
         {
-            if (symbolStackSize == 0 || input.list[pos].content.symbol_char == '(')
-            {
-                printf("( ");
-                symbolStack[symbolStackSize] = input.list[pos];
-                symbolStackSize++;
-            }
-            else if (input.list[pos].content.symbol_char == ')')
-            {
-                printf(") ");
-                while (symbolStack[symbolStackSize].content.symbol_char != '(') {
-                    output[outputSize] = symbolStack[symbolStackSize];
-                    outputSize++;
-                    symbolStackSize--;
-                }
-                symbolStackSize--;
-            }
-            else { // se input nao for ')'
-                printf(". ");
-                while (input.list[pos].flags & 0b00000111 < symbolStack[symbolStackSize].flags & 0b00000111)
-                {
-                    output[outputSize] = symbolStack[symbolStackSize];
-                    outputSize++;
-                    symbolStackSize--;
-                }
-                symbolStack[symbolStackSize] = input.list[pos];
-                symbolStackSize++;
-            }
-            
-            // // processa simbolo conforme lógica da RPN usando symbolStack
-            // /*
-            // se topo == 0 ou se novo == '('
-            //     bota na pilha
-            //     incrementa topo da pilha
-            // se novo == ')'
-            //     se topo é '('
-            //         remove da pilha
-            //         decrementa topo da pilha
-            //     se não
-            //         bota topo na saída
-            //         incrementa tamanho da saída
-            //         remove topo da pilha
-            //         decrementa topo da pilha
-            //         repete até topo ser '('
-            // se não
-            //     se prioridade do novo < prioridade do topo e topo >= 0
-            //         tira topo e bota na saída
-            //         repete até ser false
-            //         bota novo na pilha
-            //     se não
-            //         bota novo na pilha
-            // */
+            // processa simbolo conforme lógica da RPN usando symbolStack
         }
     }
 
@@ -117,9 +64,8 @@ int main() {
     createRPNStack(structuredExp, stack);
 
     // ---------------------------------
-    printf("\n");
+
     printf("expressao original: %s\n", input);
-    // printf("caracteres da expressao original: %d\n", strlen(input));
     printf("tamanho da expressao original: %d\n", structuredExp.size);
     printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
     printf("tamanho da pilha de simbolos:  %d\n", structuredExp.symbolStackSize);
@@ -127,18 +73,6 @@ int main() {
     for (int i = 0; i < structuredExp.size; i++)
     {
         EXPRESSION_ELEMENT element = structuredExp.list[i];
-        unsigned char flags = element.flags;
-
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%d ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
-
-    printf("\nRPN: \n");
-
-    for (int i = 0; i < structuredExp.RPNExpSize; i++)
-    {
-        EXPRESSION_ELEMENT element = stack[i];
         unsigned char flags = element.flags;
 
         if(flags & 1 << 7) printf("%f ", element.content.number_double);
