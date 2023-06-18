@@ -221,13 +221,13 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
     while (exp[pos] != '\0') {
         // .0123456789
         if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
-            currentNumberLength++;
+            currentNumberLength++; // 2
             currentNumber = realloc(currentNumber, currentNumberLength);
             currentNumber[currentNumberLength-2] = exp[pos];
             currentNumber[currentNumberLength-1] = '\0';
-        }
-        else {
-            if (currentNumber[0] != '\0') {
+
+            // se pos+1 não for numérico
+            if(!(exp[pos+1] >= '0' && exp[pos+1] <= '9' || exp[pos+1] == '.')) {
                 EXPRESSION_ELEMENT number;
                 number.flags = 0;
 
@@ -258,7 +258,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 currentNumber = realloc(currentNumber, currentNumberLength);
                 currentNumber[0] = '\0';
             }
-
+        }
+        else {
             if (exp[pos] == '(' || exp[pos] == ')') {
                 EXPRESSION_ELEMENT symbol;
                 symbol.flags = 0b00000100;
@@ -276,8 +277,6 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
 
                 symbol.flags = 0;
                 symbol.content.symbol_char = exp[pos];
-                elementList.symbolStackSize++;
-                elementList.RPNExpSize++;
                 
                 switch (exp[pos])
                 {
@@ -295,6 +294,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 }
 
                 elementList.size++;
+                elementList.RPNExpSize++;
+                elementList.symbolStackSize++;
                 elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
                 elementList.list[elementList.size-1] = symbol;
             }

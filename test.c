@@ -116,24 +116,19 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 }
 
 int main() {
-    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20)";
-    char exp[] = "3.5*15/(3+2)^2-1";
+    //char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20";
+    char exp[] = "(3.5*15/(3+2)^2-1.5)";
+    //char e[] = "1+1";
 
-    ELEMENT_LIST structuredExp = transformCharToStruct(input);
+    ELEMENT_LIST structuredExp = transformCharToStruct(exp);
     EXPRESSION_ELEMENT stack[structuredExp.RPNExpSize];
 
     //createRPNStack(structuredExp, stack);
 
-    // ---------------------------------
-    printf("\n");
-    printf("expressao original: %s\n", input);
-    // printf("caracteres da expressao original: %d\n", strlen(input));
+    printf("%s\n", exp);
     printf("tamanho da expressao original: %d\n", structuredExp.size);
-    printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
     printf("tamanho da pilha de simbolos:  %d\n", structuredExp.symbolStackSize);
-
-    for (int i = 0; i < structuredExp.size; i++)
-        printf("%d\n", structuredExp.list[i].flags);
+    printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
 
     for (int i = 0; i < structuredExp.size; i++)
     {
@@ -145,7 +140,7 @@ int main() {
         else printf("%c ", element.content.symbol_char);
     }
 
-    printf("\nRPN %d: \n", structuredExp.RPNExpSize);
+    // printf("\nRPN: \n", structuredExp.RPNExpSize);
 
     // for (int i = 0; i < structuredExp.RPNExpSize; i++)
     // {
@@ -158,130 +153,6 @@ int main() {
     // }
 
     return 0;
-}
-
-// FUNÇÕES PRONTAS
-
-int hasSyntaxError(char exp[]) {
-    char pos = 1;
-    char openedBrackets = 0;
-    char dotsOfCurrentNumber = 0;
-
-    if (exp[0] == '*' || exp[0] == '/' || 
-        exp[0] == '^' || exp[0] == ')' || 
-        exp[0] == '\0') return 1;
-
-    if (exp[0] == '(') openedBrackets++;
-
-    while (exp[pos] != '\0') {
-        if (exp[pos] == '.') {
-            dotsOfCurrentNumber++;
-            if (dotsOfCurrentNumber > 1) return 1;
-        }
-        else
-            if (exp[pos] < '0' || exp[pos] > '9') dotsOfCurrentNumber = 0;
-
-        if (exp[pos] >= '0' && exp[pos] <= '9' &&
-        (exp[pos-1] == ')' || exp[pos+1] == '(')
-        ) return 1;
-        
-        else if (exp[pos] == '.'
-        && (exp[pos+1] < '0' || exp[pos+1] > '9')
-        ) return 1;
-
-        else if (exp[pos] == '+' || exp[pos] == '-')
-        {
-            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
-            && (exp[pos-1] < '(' || exp[pos-1] > ')')
-            || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && exp[pos+1] != '(' && exp[pos+1] != '.'
-            ) return 1;
-        }
-
-        else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
-        {
-            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
-            && (exp[pos-1] != ')')
-            || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && (exp[pos+1] != '(')
-            ) return 1;
-        }
-
-        else if (exp[pos] == '(')
-        {
-            openedBrackets++;
-            if (exp[pos-1] != '+' && exp[pos-1] != '-'
-            && exp[pos-1] != '*' && exp[pos-1] != '/'
-            && exp[pos-1] != '^' && exp[pos-1] != '('
-            || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && exp[pos+1] != '+' && exp[pos+1] != '-'
-            && exp[pos+1] != '(' && exp[pos+1] != '.'
-            ) return 1;
-        }
-
-        else if (exp[pos] == ')')
-        {
-            openedBrackets--;
-            if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
-            || exp[pos+1] != '+' && exp[pos+1] != '-'
-            && exp[pos+1] != '*' && exp[pos+1] != '/'
-            && exp[pos+1] != '^' && exp[pos+1] != ')'
-            && exp[pos+1] != '\0'
-            ) return 1;
-        }
-
-        if (exp[pos+1] == '\0'
-            && (exp[pos] < '0' || exp[pos] > '9')
-            && exp[pos] != ')') return 1;
-
-        pos++;
-    }
-
-    return openedBrackets ? 1 : 0;
-}
-
-char * addZeroToSpecialCases(char exp[]) {
-
-    int newExpSize = 1;
-    char* newExp = calloc(1, sizeof(char));
-
-    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
-    {
-        newExp = realloc(newExp, newExpSize+2);
-        newExp[0] = '0';
-        newExp[1] = exp[0];
-        newExp[2] = '\0';
-        newExpSize += 2;
-    }
-    else {
-        newExp = realloc(newExp, newExpSize+1);
-        newExp[0] = exp[0];
-        newExp[1] = '\0';
-        newExpSize += 1;
-    }
-
-    int pos = 1;
-    while (exp[pos] != '\0') {
-        if (((exp[pos] == '+' || exp[pos] == '-') 
-        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
-        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
-        {
-            newExp = realloc(newExp, newExpSize+2);
-            newExp[newExpSize-1] = '0';
-            newExp[newExpSize] = exp[pos];
-            newExp[newExpSize+1] = '\0';
-            newExpSize += 2;
-        }
-        else 
-        {
-            newExp = realloc(newExp, newExpSize+1);
-            newExp[newExpSize-1] = exp[pos];
-            newExp[newExpSize] = '\0';
-            newExpSize += 1;
-        }
-        pos++;
-    }
-    return newExp;
 }
 
 ELEMENT_LIST transformCharToStruct(char* exp) {
@@ -298,13 +169,13 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
     while (exp[pos] != '\0') {
         // .0123456789
         if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
-            currentNumberLength++;
+            currentNumberLength++; // 2
             currentNumber = realloc(currentNumber, currentNumberLength);
             currentNumber[currentNumberLength-2] = exp[pos];
             currentNumber[currentNumberLength-1] = '\0';
-        }
-        else {
-            if (currentNumber[0] != '\0') {
+
+            // se pos+1 não for numérico
+            if(!(exp[pos+1] >= '0' && exp[pos+1] <= '9' || exp[pos+1] == '.')) {
                 EXPRESSION_ELEMENT number;
                 number.flags = 0;
 
@@ -335,7 +206,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 currentNumber = realloc(currentNumber, currentNumberLength);
                 currentNumber[0] = '\0';
             }
-
+        }
+        else {
             if (exp[pos] == '(' || exp[pos] == ')') {
                 EXPRESSION_ELEMENT symbol;
                 symbol.flags = 0b00000100;
@@ -353,8 +225,6 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
 
                 symbol.flags = 0;
                 symbol.content.symbol_char = exp[pos];
-                elementList.symbolStackSize++;
-                elementList.RPNExpSize++;
                 
                 switch (exp[pos])
                 {
@@ -372,6 +242,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 }
 
                 elementList.size++;
+                elementList.RPNExpSize++;
+                elementList.symbolStackSize++;
                 elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
                 elementList.list[elementList.size-1] = symbol;
             }
