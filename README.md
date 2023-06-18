@@ -49,8 +49,6 @@ shift (pra inversa das funções abaixo)
 `>>> 30 teclas até aqui`
 
 ## Pontos pra análise
-- ~~preciso adicionar 0 **depois** de +, - e .?~~ precisa, já foi tratado
-- ~~number_int é suficientemente grande?~~ agora é
 - trocar o botão clear por segurar o backspace?
 - como limitar a entrada de inteiros maiores que o permitido?
 - o tamanho do lado esquerdo do float é um problema a ser resolvido?
@@ -62,8 +60,6 @@ shift (pra inversa das funções abaixo)
 - por enquanto sem função pra integral definida
 
 ## Melhorias futuras
-- ~~permitir que o usuário calcule ".1" completando com zero~~ (done)
-- ~~permitir que o usuário calcule "1+-+++---+-1"~~ (pensando bem, pra quê?)
 - tratar sintax error pra press = com string vazia (ignorar tentativa)
 - ler um float com "qualquer" precisão e calcular como notação científica
 - mapear erros possíveis e separar em categorias (return 1, return 2, etc)
@@ -71,28 +67,8 @@ shift (pra inversa das funções abaixo)
 - permitir que o usuário calcule "1(1+1)"
 - implementar raízes de índice N
 
-## DOCUMENTAÇÃO
-
-### explicar as flags desse char
-
-```c
-typedef struct EXPRESSION_ELEMENT {
-    unsigned char flags; // [0 0000 000] => is_decimal[7] <not_used>[6:3] priority[2:0]
-    union {
-        char symbol_char;
-        double number_double;
-        int number_int;
-    } content;
-} EXPRESSION_ELEMENT;
-```
-
-### explicar essa estrutura
-
-```c
-typedef struct {
-    int sizeOfList;
-    EXPRESSION_ELEMENT* list;
-} ELEMENT_LIST;
-```
-
-### explicar limitação de 6 casas decimais para float
+## Documentação
+- explicar limitação de 6 casas decimais para float
+- fazer tabela com prioridades dos elementos
+- explicar flags do `EXPRESSION_ELEMENT`
+- explicar estrutura `ELEMENT_LIST`
