@@ -215,16 +215,16 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
     elementList.size = 0;
 
     int pos = 0;
-    int currentNumberLength = 1;
+    int currentNumberLength = 0;
     char* currentNumber = calloc(1, sizeof(char));
 
     while (exp[pos] != '\0') {
         // .0123456789
         if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
             currentNumberLength++; // 2
-            currentNumber = realloc(currentNumber, currentNumberLength);
-            currentNumber[currentNumberLength-2] = exp[pos];
-            currentNumber[currentNumberLength-1] = '\0';
+            currentNumber = realloc(currentNumber, currentNumberLength+1);
+            currentNumber[currentNumberLength-1] = exp[pos];
+            currentNumber[currentNumberLength] = '\0';
 
             // se pos+1 não for numérico
             if(!(exp[pos+1] >= '0' && exp[pos+1] <= '9' || exp[pos+1] == '.')) {
@@ -254,8 +254,8 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 elementList.list[elementList.size-1] = number;
 
                 // reseta currentNumber pra proxima iteração
-                currentNumberLength = 1;
-                currentNumber = realloc(currentNumber, currentNumberLength);
+                currentNumberLength = 0;
+                currentNumber = realloc(currentNumber, currentNumberLength+1);
                 currentNumber[0] = '\0';
             }
         }
