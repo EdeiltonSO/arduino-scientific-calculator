@@ -53,6 +53,7 @@ shift (pra inversa das funções abaixo)
 - como limitar a entrada de inteiros maiores que o permitido?
 - o tamanho do lado esquerdo do float é um problema a ser resolvido?
 - limitar a entrada de mais de 6 casas decimais após a vírgula?
+- o que acontece com a ordem de precedência ao adicionar o zero em `-3.5*15`?
 
 ## Outras decisões
 - não haverá tecla pra constante pi (usuário digitará manualmente)

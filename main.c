@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     unsigned char flags;
@@ -60,15 +61,17 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 }
 
 int main() {
-    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
-    char exp[] = "-3.5*15/(3+2)^2-1";
+    char input2[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    char input[] = "-3.5*15/(3+2)^2-1";
     ARRAY expWithZeros;
 
-    printf("\nexp:           %s", exp);
-    addZeroToSpecialCases(exp, &expWithZeros);
+    printf("\ninput:         %s", input);
+    addZeroToSpecialCases(input, &expWithZeros);
+    printf("\nstrlen: %d, size: %d", strlen(expWithZeros.values), expWithZeros.size);
     printf("\nwith zeros:    %s", expWithZeros.values);
+    
     ELEMENT_LIST structuredExp = transformCharToStruct(expWithZeros.values);
-    printf("\nstructuredExp: ");    
+    printf("\nstructuredExp: ");
     for (int i = 0; i < structuredExp.size; i++)
     {
         EXPRESSION_ELEMENT element = structuredExp.list[i];
