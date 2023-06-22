@@ -17,8 +17,13 @@ typedef struct {
     EXPRESSION_ELEMENT* list;
 } ELEMENT_LIST;
 
+typedef struct {
+    char size;
+    char* values;
+} ARRAY;
+
 int hasSyntaxError(char *);
-char * addZeroToSpecialCases(char *);
+void addZeroToSpecialCases(char *, ARRAY *);
 ELEMENT_LIST transformCharToStruct(char *);
 
 void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
@@ -55,21 +60,15 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 }
 
 int main() {
-    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20)";
-    char exp[] = "3.5*15/(3+2)^2-1";
+    char input[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    char exp[] = "-3.5*15/(3+2)^2-1";
+    ARRAY expWithZeros;
 
-    ELEMENT_LIST structuredExp = transformCharToStruct(input);
-    EXPRESSION_ELEMENT stack[structuredExp.RPNExpSize];
-
-    createRPNStack(structuredExp, stack);
-
-    // ---------------------------------
-
-    printf("expressao original: %s\n", input);
-    printf("tamanho da expressao original: %d\n", structuredExp.size);
-    printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
-    printf("tamanho da pilha de simbolos:  %d\n", structuredExp.symbolStackSize);
-
+    printf("\nexp:           %s", exp);
+    addZeroToSpecialCases(exp, &expWithZeros);
+    printf("\nwith zeros:    %s", expWithZeros.values);
+    ELEMENT_LIST structuredExp = transformCharToStruct(expWithZeros.values);
+    printf("\nstructuredExp: ");    
     for (int i = 0; i < structuredExp.size; i++)
     {
         EXPRESSION_ELEMENT element = structuredExp.list[i];
@@ -79,6 +78,14 @@ int main() {
         else if (!(flags | 0)) printf("%d ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
+    
+    // EXPRESSION_ELEMENT stack[structuredExp.RPNExpSize];
+    // createRPNStack(structuredExp, stack);
+
+    // printf("expressao original: %s\n", input);
+    // printf("tamanho da expressao original: %d\n", structuredExp.size);
+    // printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
+    // printf("tamanho da pilha de simbolos:  %d\n", structuredExp.symbolStackSize);
 
     return 0;
 }
@@ -163,48 +170,48 @@ int hasSyntaxError(char exp[]) {
     return openedBrackets ? 1 : 0;
 }
 
-char * addZeroToSpecialCases(char exp[]) {
+void addZeroToSpecialCases(char exp[], ARRAY *expWithZeros) {
 
-    int newExpSize = 1;
-    char* newExp = calloc(1, sizeof(char));
+    char zerosToAdd = 0;
+    char inputSize = 1;
+    char pos = 1;
+    (*expWithZeros).size = 0;
+
+    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-') 
+        zerosToAdd++;
+
+    while (exp[pos] != '\0') {
+        if ((exp[pos] == '.' || exp[pos] == '+' || exp[pos] == '-') && (exp[pos-1] < '0' || exp[pos-1] > '9')) {
+            zerosToAdd++;
+        }
+        inputSize++;
+        pos++;
+    }
+
+    (*expWithZeros).values[inputSize+zerosToAdd];
+    (*expWithZeros).values[inputSize+zerosToAdd] = '\0';
 
     if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
     {
-        newExp = realloc(newExp, newExpSize+2);
-        newExp[0] = '0';
-        newExp[1] = exp[0];
-        newExp[2] = '\0';
-        newExpSize += 2;
+        (*expWithZeros).values[0] = '0';
+        (*expWithZeros).values[1] = exp[0];
+        (*expWithZeros).size += 2;
     }
-    else {
-        newExp = realloc(newExp, newExpSize+1);
-        newExp[0] = exp[0];
-        newExp[1] = '\0';
-        newExpSize += 1;
-    }
+    else (*expWithZeros).values[(*expWithZeros).size++] = exp[0];
 
-    int pos = 1;
+    pos = 1;
+
     while (exp[pos] != '\0') {
         if (((exp[pos] == '+' || exp[pos] == '-') 
         && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
         || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
         {
-            newExp = realloc(newExp, newExpSize+2);
-            newExp[newExpSize-1] = '0';
-            newExp[newExpSize] = exp[pos];
-            newExp[newExpSize+1] = '\0';
-            newExpSize += 2;
+            (*expWithZeros).values[(*expWithZeros).size++] = '0';
+            (*expWithZeros).values[(*expWithZeros).size++] = exp[pos];
         }
-        else 
-        {
-            newExp = realloc(newExp, newExpSize+1);
-            newExp[newExpSize-1] = exp[pos];
-            newExp[newExpSize] = '\0';
-            newExpSize += 1;
-        }
+        else (*expWithZeros).values[(*expWithZeros).size++] = exp[pos];
         pos++;
     }
-    return newExp;
 }
 
 ELEMENT_LIST transformCharToStruct(char* exp) {
