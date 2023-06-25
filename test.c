@@ -28,8 +28,6 @@ ARRAY addZeroToSpecialCases(char *);
 ELEMENT_LIST transformCharToStruct(char *);
 
 void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
-    printf("\ntamanho da lista: %i\ntamanho da pilha: %i\n", input.size, input.RPNExpSize);
-
     EXPRESSION_ELEMENT symbolStack[input.symbolStackSize];
     char symbolStackSize = 0;
     char outputSize = 0;
@@ -42,16 +40,11 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         // trocar essa e outras condicionais por diretivas define
         if(!(flags & 0b00000111)) // se for número
         {
-            printf("# ");
-            // printf("\n# > stackSize: %i", symbolStackSize);
-            // printf("\n# > outputSize: %i\n", outputSize);
-            
             output[outputSize] = input.list[pos];
             outputSize++;
         }
-        else if (symbolStackSize == 0)
+        else if (symbolStackSize == 0 && outputSize == 0)
         {
-            printf(". ");
             symbolStack[symbolStackSize] = input.list[pos];
             symbolStackSize++;
         }
@@ -59,72 +52,46 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         {
             if (input.list[pos].content.symbol_char == '(')
             {
-                printf("( ");
-                // printf("\n( > stackSize: %i", symbolStackSize);
-                // printf("\n( > outputSize: %i\n", outputSize);
-                
-                // symbolStack[symbolStackSize] = input.list[pos];
+                symbolStack[symbolStackSize] = input.list[pos];
                 symbolStackSize++;
             }
             else if (input.list[pos].content.symbol_char == ')')
             {
-                printf(") ");
-                // printf("\n) > stackSize: %i", symbolStackSize);
-                // printf("\n) > outputSize: %i\n", outputSize);
-                
-                // while (symbolStack[symbolStackSize].content.symbol_char != '(') {
-                //     output[outputSize] = symbolStack[symbolStackSize];
-                //     outputSize++;
-                //     symbolStackSize--;
-                // }
+                while (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
+                    output[outputSize] = symbolStack[symbolStackSize-1];
+                    outputSize++;
+                    symbolStackSize--;
+                }
                 symbolStackSize--;
             }
             else { // se input for +-*/^
-                //printf("[%d ", input.list[pos].flags & 0b00000111);
-                printf("[0x%x] ", symbolStack[symbolStackSize].flags & 0b00000111);
-                // printf("\n%c > stackSize: %i", input.list[pos].content.symbol_char, symbolStackSize);
-                // printf("\n%c > outputSize: %i\n", input.list[pos].content.symbol_char, outputSize);
-
-                // while (input.list[pos].flags & 0b00000111 < symbolStack[symbolStackSize].flags & 0b00000111)
-                // {
-                //     output[outputSize] = symbolStack[symbolStackSize];
-                //     outputSize++;
-                //     symbolStackSize--;
-                // }
-                // symbolStack[symbolStackSize] = input.list[pos];
+                while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111))
+                {
+                    if (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
+                        output[outputSize] = symbolStack[symbolStackSize-1];
+                        outputSize++;
+                        symbolStackSize--;
+                    }
+                    else break;
+                }
+                symbolStack[symbolStackSize] = input.list[pos];
                 symbolStackSize++;
-            }
-            
-            // // processa simbolo conforme lógica da RPN usando symbolStack
-            // /*
-            // se topo == 0 ou se novo == '('
-            //     bota na pilha
-            //     incrementa topo da pilha
-            // se novo == ')'
-            //     se topo é '('
-            //         remove da pilha
-            //         decrementa topo da pilha
-            //     se não
-            //         bota topo na saída
-            //         incrementa tamanho da saída
-            //         remove topo da pilha
-            //         decrementa topo da pilha
-            //         repete até topo ser '('
-            // se não
-            //     se prioridade do novo < prioridade do topo e topo >= 0
-            //         tira topo e bota na saída
-            //         repete até ser false
-            //         bota novo na pilha
-            //     se não
-            //         bota novo na pilha
-            // */
+            }            
         }
+    }
+
+    while (symbolStackSize != 0)
+    {
+        output[outputSize] = symbolStack[symbolStackSize];
+        outputSize++;
+        symbolStackSize--;
     }
 
     // pegar o último elemento do vetor output e add uma flag
     // informando que aquele é o último elemento da lista
     // a próxima função usa esse vetor e itera nele
     // até detectar essa flag
+    printf("ok\n");
 }
 
 void stackSolver(/* recebe ponteiro pra pilha */) {
@@ -133,16 +100,149 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 
 int main() {
     //char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20";
-    char exp[] = "-(3.5*15/(-3+.2)^2-1.5)";
+    char exp[] = "(3.5*15/(3+0.2)^2-1.5)";
     //char e[] = "1+1";
 
-    ARRAY a = addZeroToSpecialCases(exp);
+    // ARRAY a = addZeroToSpecialCases(exp);
 
     printf("\n%s", exp);
-    printf("\n%s", a.values);
+    // printf("\n%s", a.values);
     printf("\nexp: %d", strlen(exp));
-    printf("\na:   %d", strlen(a.values));
+    // printf("\na:   %d", strlen(a.values));
+
+    ELEMENT_LIST structuredExp = transformCharToStruct(exp);
+    printf("\n");
+    for (int i = 0; i < structuredExp.size; i++)
+    {
+        EXPRESSION_ELEMENT element = structuredExp.list[i];
+        unsigned char flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%d ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+
+    EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
+    createRPNStack(structuredExp, rpnStack);
+
+    unsigned char flags;
+    EXPRESSION_ELEMENT element;
+    for (int i = 0; i < structuredExp.RPNExpSize; i++)
+    {
+        element = rpnStack[i];
+        flags = element.flags;
+
+        //printf("> ");
+
+        if(flags == 0b10000000) printf("%f ", element.content.number_double);
+        else if (flags == 0b00000000) printf("%i ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+
+        // if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        // else if (!(flags | 0)) printf("%i ", element.content.number_int);
+        // else printf("%c ", element.content.symbol_char);
+    }
+    
+    printf("\n\n");
 
     return 0;
 }
 
+ELEMENT_LIST transformCharToStruct(char* exp) {
+    ELEMENT_LIST elementList;
+    elementList.list = malloc(sizeof(EXPRESSION_ELEMENT));
+    elementList.symbolStackSize = 0;
+    elementList.RPNExpSize = 0;
+    elementList.size = 0;
+
+    int pos = 0;
+    int currentNumberLength = 0;
+    char* currentNumber = calloc(1, sizeof(char));
+
+    while (exp[pos] != '\0') {
+        // .0123456789
+        if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
+            currentNumberLength++; // 2
+            currentNumber = realloc(currentNumber, currentNumberLength+1);
+            currentNumber[currentNumberLength-1] = exp[pos];
+            currentNumber[currentNumberLength] = '\0';
+
+            // se pos+1 não for numérico
+            if(!(exp[pos+1] >= '0' && exp[pos+1] <= '9' || exp[pos+1] == '.')) {
+                EXPRESSION_ELEMENT number;
+                number.flags = 0;
+
+                int i = 0;
+                while (currentNumber[i] != '\0')
+                {
+                    if (currentNumber[i] == '.')
+                    {
+                        number.flags = 0x80;
+                        break;
+                    }
+                    i++;
+                }
+
+                if(number.flags & 1 << 7)
+                    number.content.number_double = atof(currentNumber);
+                else
+                    number.content.number_int = atol(currentNumber);
+
+                elementList.size++;
+                elementList.RPNExpSize++;
+
+                if (elementList.size > 1) elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+                elementList.list[elementList.size-1] = number;
+
+                // reseta currentNumber pra proxima iteração
+                currentNumberLength = 0;
+                currentNumber = realloc(currentNumber, currentNumberLength+1);
+                currentNumber[0] = '\0';
+            }
+        }
+        else {
+            if (exp[pos] == '(' || exp[pos] == ')') {
+                EXPRESSION_ELEMENT symbol;
+                symbol.flags = 0b00000100;
+                symbol.content.symbol_char = exp[pos];
+
+                elementList.size++;
+                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+                elementList.list[elementList.size-1] = symbol;
+
+                if(exp[pos] == '(') elementList.symbolStackSize++;
+            }
+            else // +-*/^
+            {
+                EXPRESSION_ELEMENT symbol;
+
+                symbol.flags = 0;
+                symbol.content.symbol_char = exp[pos];
+                
+                switch (exp[pos])
+                {
+                case '^':
+                    symbol.flags |= 1 << 1;
+                    symbol.flags |= 1 << 0;
+                    break;
+                case '*':
+                case '/':
+                    symbol.flags |= 1 << 1;
+                    break;
+                default:
+                    symbol.flags |= 1 << 0;
+                    break;
+                }
+
+                elementList.size++;
+                elementList.RPNExpSize++;
+                elementList.symbolStackSize++;
+                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+                elementList.list[elementList.size-1] = symbol;
+            }
+        }
+        pos++;        
+    }
+    free(currentNumber);
+    return elementList;
+}
