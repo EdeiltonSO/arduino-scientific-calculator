@@ -26,52 +26,21 @@ typedef struct {
 int hasSyntaxError(char *);
 void addZeroToSpecialCases(char *, ARRAY *);
 ELEMENT_LIST transformCharToStruct(char *);
-
-void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
-    printf("tamanho da lista: %i\ntamanho da pilha: %i\n", input.size, input.RPNExpSize);
-
-    EXPRESSION_ELEMENT symbolStack[input.symbolStackSize];
-    char symbolStackSize = 0;
-    char outputSize = 0;
-
-    for (int pos = 0; pos < input.size; pos++)
-    {
-        EXPRESSION_ELEMENT element = input.list[pos];
-        unsigned char flags = element.flags;
-
-        // trocar essa e outras condicionais por diretivas define
-        if(!(flags | 0 << 2) && !(flags | 0 << 1) && !(flags | 0 << 0))
-        {
-            // processa numeros conforme lógica da RPN
-        }
-        else
-        {
-            // processa simbolo conforme lógica da RPN usando symbolStack
-        }
-    }
-
-    // pegar o último elemento do vetor output e add uma flag
-    // informando que aquele é o último elemento da lista
-    // a próxima função usa esse vetor e itera nele
-    // até detectar essa flag
-}
+void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
 void stackSolver(/* recebe ponteiro pra pilha */) {
     // retorna resultado
 }
 
 int main() {
-    char input2[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
-    char input[] = "-3.5*15/(3+2)^2-1";
-    ARRAY expWithZeros;
+    // char input2[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    // char input[] = "-3.5*15/(3+2)^2-1";
+    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)";
+    char c[] = "1+1";
 
-    printf("\ninput:         %s", input);
-    addZeroToSpecialCases(input, &expWithZeros);
-    printf("\nstrlen: %d, size: %d", strlen(expWithZeros.values), expWithZeros.size);
-    printf("\nwith zeros:    %s", expWithZeros.values);
-    
-    ELEMENT_LIST structuredExp = transformCharToStruct(expWithZeros.values);
-    printf("\nstructuredExp: ");
+    ELEMENT_LIST structuredExp = transformCharToStruct(a);
+    printf("\n");
     for (int i = 0; i < structuredExp.size; i++)
     {
         EXPRESSION_ELEMENT element = structuredExp.list[i];
@@ -81,14 +50,24 @@ int main() {
         else if (!(flags | 0)) printf("%d ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
-    
-    // EXPRESSION_ELEMENT stack[structuredExp.RPNExpSize];
-    // createRPNStack(structuredExp, stack);
 
-    // printf("expressao original: %s\n", input);
-    // printf("tamanho da expressao original: %d\n", structuredExp.size);
-    // printf("tamanho da expressao em RPN:   %d\n", structuredExp.RPNExpSize);
-    // printf("tamanho da pilha de simbolos:  %d\n", structuredExp.symbolStackSize);
+    EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
+    createRPNStack(structuredExp, rpnStack);
+
+    printf("\n");
+    unsigned char flags;
+    EXPRESSION_ELEMENT element;
+    for (int i = 0; i < structuredExp.RPNExpSize; i++)
+    {
+        element = rpnStack[i];
+        flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%i ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+    
+    printf("\n\n");
 
     return 0;
 }
@@ -314,4 +293,65 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
     }
     free(currentNumber);
     return elementList;
+}
+
+void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
+    EXPRESSION_ELEMENT symbolStack[input.symbolStackSize];
+    char symbolStackSize = 0;
+    char outputSize = 0;
+
+    for (int pos = 0; pos < input.size; pos++)
+    {
+        EXPRESSION_ELEMENT element = input.list[pos];
+        unsigned char flags = element.flags;
+
+        // trocar essa e outras condicionais por diretivas define
+        if(!(flags & 0b00000111)) // se for número
+        {
+            output[outputSize] = input.list[pos];
+            outputSize++;
+        }
+        else if (symbolStackSize == 0)
+        {
+            symbolStack[symbolStackSize] = input.list[pos];
+            symbolStackSize++;
+        }
+        else
+        {
+            if (input.list[pos].content.symbol_char == '(')
+            {
+                symbolStack[symbolStackSize] = input.list[pos];
+                symbolStackSize++;
+            }
+            else if (input.list[pos].content.symbol_char == ')')
+            {
+                while (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
+                    output[outputSize] = symbolStack[symbolStackSize-1];
+                    outputSize++;
+                    symbolStackSize--;
+                }
+                symbolStackSize--;
+            }
+            else { // se input for +-*/^
+                while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111))
+                {
+                    if (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
+                        output[outputSize] = symbolStack[symbolStackSize-1];
+                        outputSize++;
+                        symbolStackSize--;
+                    }
+                    else break;
+                }
+                symbolStack[symbolStackSize] = input.list[pos];
+                symbolStackSize++;
+            }            
+        }
+    }
+
+    while (symbolStackSize != 0)
+    {
+        output[outputSize] = symbolStack[symbolStackSize-1];
+        outputSize++;
+        symbolStackSize--;
+    }
 }

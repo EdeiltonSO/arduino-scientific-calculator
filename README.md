@@ -14,7 +14,7 @@
 - [x] add 0 antes dos +, - e . que precisarem
 - [x] explodir a string
 - [x] converter em vetor de structs (avaliar uso de atoi e atof)
-- [ ] jogar structs numa pilha RPN
+- [x] jogar structs numa pilha RPN
 - [ ] resolver a pilha em RPN
 - [ ] formatar dado de saída
 

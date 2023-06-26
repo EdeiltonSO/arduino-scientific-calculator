@@ -43,7 +43,7 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
             output[outputSize] = input.list[pos];
             outputSize++;
         }
-        else if (symbolStackSize == 0 && outputSize == 0)
+        else if (symbolStackSize == 0)
         {
             symbolStack[symbolStackSize] = input.list[pos];
             symbolStackSize++;
@@ -82,16 +82,10 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
 
     while (symbolStackSize != 0)
     {
-        output[outputSize] = symbolStack[symbolStackSize];
+        output[outputSize] = symbolStack[symbolStackSize-1];
         outputSize++;
         symbolStackSize--;
     }
-
-    // pegar o último elemento do vetor output e add uma flag
-    // informando que aquele é o último elemento da lista
-    // a próxima função usa esse vetor e itera nele
-    // até detectar essa flag
-    printf("ok\n");
 }
 
 void stackSolver(/* recebe ponteiro pra pilha */) {
@@ -99,18 +93,18 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 }
 
 int main() {
-    //char input[] = "-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789123456789))-20";
-    char exp[] = "(3.5*15/(3+0.2)^2-1.5)";
-    //char e[] = "1+1";
+    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)";
+    char c[] = "1+1";
 
     // ARRAY a = addZeroToSpecialCases(exp);
 
-    printf("\n%s", exp);
+    // printf("\n%s", exp);
     // printf("\n%s", a.values);
-    printf("\nexp: %d", strlen(exp));
+    // printf("\nexp: %d", strlen(exp));
     // printf("\na:   %d", strlen(a.values));
 
-    ELEMENT_LIST structuredExp = transformCharToStruct(exp);
+    ELEMENT_LIST structuredExp = transformCharToStruct(a);
     printf("\n");
     for (int i = 0; i < structuredExp.size; i++)
     {
@@ -125,6 +119,7 @@ int main() {
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
 
+    printf("\n");
     unsigned char flags;
     EXPRESSION_ELEMENT element;
     for (int i = 0; i < structuredExp.RPNExpSize; i++)
@@ -132,15 +127,9 @@ int main() {
         element = rpnStack[i];
         flags = element.flags;
 
-        //printf("> ");
-
-        if(flags == 0b10000000) printf("%f ", element.content.number_double);
-        else if (flags == 0b00000000) printf("%i ", element.content.number_int);
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%i ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
-
-        // if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        // else if (!(flags | 0)) printf("%i ", element.content.number_int);
-        // else printf("%c ", element.content.symbol_char);
     }
     
     printf("\n\n");
