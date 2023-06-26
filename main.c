@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct {
     unsigned char flags;
@@ -208,9 +207,9 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
     char* currentNumber = calloc(1, sizeof(char));
 
     while (exp[pos] != '\0') {
-        // .0123456789
+        // se pos for numérico
         if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
-            currentNumberLength++; // 2
+            currentNumberLength++;
             currentNumber = realloc(currentNumber, currentNumberLength+1);
             currentNumber[currentNumberLength-1] = exp[pos];
             currentNumber[currentNumberLength] = '\0';
@@ -269,17 +268,17 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 
                 switch (exp[pos])
                 {
-                case '^':
-                    symbol.flags |= 1 << 1;
-                    symbol.flags |= 1 << 0;
-                    break;
-                case '*':
-                case '/':
-                    symbol.flags |= 1 << 1;
-                    break;
-                default:
-                    symbol.flags |= 1 << 0;
-                    break;
+                    case '^':
+                        symbol.flags |= 1 << 1;
+                        symbol.flags |= 1 << 0;
+                        break;
+                    case '*':
+                    case '/':
+                        symbol.flags |= 1 << 1;
+                        break;
+                    default:
+                        symbol.flags |= 1 << 0;
+                        break;
                 }
 
                 elementList.size++;
@@ -305,54 +304,32 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         EXPRESSION_ELEMENT element = input.list[pos];
         unsigned char flags = element.flags;
 
-        // trocar essa e outras condicionais por diretivas define
-        if(!(flags & 0b00000111)) // se for número
-        {
-            output[outputSize] = input.list[pos];
-            outputSize++;
-        }
+        if (!(flags & 0b00000111)) // se for número
+            output[outputSize++] = input.list[pos];
         else if (symbolStackSize == 0)
-        {
-            symbolStack[symbolStackSize] = input.list[pos];
-            symbolStackSize++;
-        }
+            symbolStack[symbolStackSize++] = input.list[pos];
         else
         {
             if (input.list[pos].content.symbol_char == '(')
-            {
-                symbolStack[symbolStackSize] = input.list[pos];
-                symbolStackSize++;
-            }
+                symbolStack[symbolStackSize++] = input.list[pos];
             else if (input.list[pos].content.symbol_char == ')')
             {
-                while (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
-                    output[outputSize] = symbolStack[symbolStackSize-1];
-                    outputSize++;
-                    symbolStackSize--;
-                }
+                while (symbolStack[symbolStackSize-1].content.symbol_char != '(')
+                    output[outputSize++] = symbolStack[--symbolStackSize];
                 symbolStackSize--;
             }
             else { // se input for +-*/^
                 while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111))
-                {
-                    if (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
-                        output[outputSize] = symbolStack[symbolStackSize-1];
-                        outputSize++;
-                        symbolStackSize--;
-                    }
+                    if (symbolStack[symbolStackSize-1].content.symbol_char != '(')
+                        output[outputSize++] = symbolStack[--symbolStackSize];
                     else break;
-                }
-                symbolStack[symbolStackSize] = input.list[pos];
-                symbolStackSize++;
+                symbolStack[symbolStackSize++] = input.list[pos];
             }            
         }
     }
 
     while (symbolStackSize != 0)
-    {
-        output[outputSize] = symbolStack[symbolStackSize-1];
-        outputSize++;
-        symbolStackSize--;
-    }
+        output[outputSize++] = symbolStack[--symbolStackSize];
+
     output[outputSize-1].flags |= 0b01000000;
 }
