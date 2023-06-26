@@ -76,13 +76,15 @@ shift (pra inversa das funções abaixo)
 
 ## Notas
 
+### Bits 7:0
 Bit  | Finalidade
 ---: | ------------------------
 7    | número decimal
 6    | último elemento da pilha RPN
-5:3  | (não utilizado)
+5:3  | (não utilizados)
 2:0  | prioridade de símbolo
 
+### Bits 2:0
 Símbolo  | Flag | Prioridade
 -------: | :--: | ------------
 \+ -     | 001  | 1
