@@ -354,4 +354,5 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         outputSize++;
         symbolStackSize--;
     }
+    output[outputSize-1].flags |= 0b01000000;
 }
