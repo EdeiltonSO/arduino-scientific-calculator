@@ -73,3 +73,21 @@ shift (pra inversa das funções abaixo)
 - fazer tabela com prioridades dos elementos
 - explicar flags do `EXPRESSION_ELEMENT`
 - explicar estrutura `ELEMENT_LIST`
+
+## Notas
+
+Bit  | Finalidade
+---: | ------------------------
+7    | número decimal
+6    | último elemento da pilha RPN
+5:3  | (não utilizado)
+2:0  | prioridade de símbolo
+
+Símbolo  | Flag | Prioridade
+-------: | :--: | ------------
+\+ -     | 001  | 1
+\* /     | 010  | 2
+^        | 011  | 3
+( )      | 100  | 4
+
+A prioridade de qualquer número é sempre **zero**.
