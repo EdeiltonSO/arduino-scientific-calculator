@@ -37,8 +37,9 @@ int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
     char b[] = "(3.5*15/(3+0.2)^2-1.5)";
     char c[] = "1+1";
+    char d[] = "0-1+3*(4-2)/5*(0-1)";
 
-    ELEMENT_LIST structuredExp = transformCharToStruct(a);
+    ELEMENT_LIST structuredExp = transformCharToStruct(d);
     printf("\n");
     for (int i = 0; i < structuredExp.size; i++)
     {
@@ -319,7 +320,7 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
                 symbolStackSize--;
             }
             else { // se input for +-*/^
-                while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111))
+                while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111) && symbolStackSize > 0)
                     if (symbolStack[symbolStackSize-1].content.symbol_char != '(')
                         output[outputSize++] = symbolStack[--symbolStackSize];
                     else break;
