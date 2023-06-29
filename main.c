@@ -6,7 +6,7 @@ typedef struct {
     union {
         char symbol_char;
         double number_double;
-        unsigned long int number_int;
+        long long int number_int;
     } content;
 } EXPRESSION_ELEMENT;
 
@@ -233,7 +233,7 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 if(number.flags & 1 << 7)
                     number.content.number_double = atof(currentNumber);
                 else
-                    number.content.number_int = atol(currentNumber);
+                    number.content.number_int = atoll(currentNumber);
 
                 elementList.size++;
                 elementList.RPNExpSize++;
