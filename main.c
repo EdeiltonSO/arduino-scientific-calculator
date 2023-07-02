@@ -32,12 +32,12 @@ void stackSolver(/* recebe ponteiro pra pilha */) {
 }
 
 int main() {
-    // char input2[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
-    // char input[] = "-3.5*15/(3+2)^2-1";
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
     char b[] = "(3.5*15/(3+0.2)^2-1.5)";
     char c[] = "1+1";
     char d[] = "0-1+3*(4-2)/5*(0-1)";
+    char e[] = "-3.5*15/(3+2)^2-1";
+    char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
 
     ELEMENT_LIST structuredExp = transformCharToStruct(d);
     printf("\n");
@@ -248,46 +248,44 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 currentNumber[0] = '\0';
             }
         }
-        else {
-            if (exp[pos] == '(' || exp[pos] == ')') {
-                EXPRESSION_ELEMENT symbol;
-                symbol.flags = 0b00000100;
-                symbol.content.symbol_char = exp[pos];
+        else if (exp[pos] == '(' || exp[pos] == ')') {
+            EXPRESSION_ELEMENT symbol;
+            symbol.flags = 0b00000100;
+            symbol.content.symbol_char = exp[pos];
 
-                elementList.size++;
-                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
-                elementList.list[elementList.size-1] = symbol;
+            elementList.size++;
+            elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+            elementList.list[elementList.size-1] = symbol;
 
-                if(exp[pos] == '(') elementList.symbolStackSize++;
-            }
-            else // +-*/^
+            if(exp[pos] == '(') elementList.symbolStackSize++;
+        }
+        else // +-*/^
+        {
+            EXPRESSION_ELEMENT symbol;
+
+            symbol.flags = 0;
+            symbol.content.symbol_char = exp[pos];
+            
+            switch (exp[pos])
             {
-                EXPRESSION_ELEMENT symbol;
-
-                symbol.flags = 0;
-                symbol.content.symbol_char = exp[pos];
-                
-                switch (exp[pos])
-                {
-                    case '^':
-                        symbol.flags |= 1 << 1;
-                        symbol.flags |= 1 << 0;
-                        break;
-                    case '*':
-                    case '/':
-                        symbol.flags |= 1 << 1;
-                        break;
-                    default:
-                        symbol.flags |= 1 << 0;
-                        break;
-                }
-
-                elementList.size++;
-                elementList.RPNExpSize++;
-                elementList.symbolStackSize++;
-                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
-                elementList.list[elementList.size-1] = symbol;
+                case '^':
+                    symbol.flags |= 1 << 1;
+                    symbol.flags |= 1 << 0;
+                    break;
+                case '*':
+                case '/':
+                    symbol.flags |= 1 << 1;
+                    break;
+                default:
+                    symbol.flags |= 1 << 0;
+                    break;
             }
+
+            elementList.size++;
+            elementList.RPNExpSize++;
+            elementList.symbolStackSize++;
+            elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+            elementList.list[elementList.size-1] = symbol;
         }
         pos++;        
     }

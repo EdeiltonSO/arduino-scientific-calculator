@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct {
     unsigned char flags;
     union {
         char symbol_char;
         double number_double;
-        unsigned long int number_int;
+        long long int number_int;
     } content;
 } EXPRESSION_ELEMENT;
 
@@ -24,69 +23,9 @@ typedef struct {
 } ARRAY;
 
 int hasSyntaxError(char *);
-ARRAY addZeroToSpecialCases(char *);
+void addZeroToSpecialCases(char *, ARRAY *);
 ELEMENT_LIST transformCharToStruct(char *);
-
-void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
-    EXPRESSION_ELEMENT symbolStack[input.symbolStackSize];
-    char symbolStackSize = 0;
-    char outputSize = 0;
-
-    for (int pos = 0; pos < input.size; pos++)
-    {
-        EXPRESSION_ELEMENT element = input.list[pos];
-        unsigned char flags = element.flags;
-
-        // trocar essa e outras condicionais por diretivas define
-        if(!(flags & 0b00000111)) // se for número
-        {
-            output[outputSize] = input.list[pos];
-            outputSize++;
-        }
-        else if (symbolStackSize == 0)
-        {
-            symbolStack[symbolStackSize] = input.list[pos];
-            symbolStackSize++;
-        }
-        else
-        {
-            if (input.list[pos].content.symbol_char == '(')
-            {
-                symbolStack[symbolStackSize] = input.list[pos];
-                symbolStackSize++;
-            }
-            else if (input.list[pos].content.symbol_char == ')')
-            {
-                while (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
-                    output[outputSize] = symbolStack[symbolStackSize-1];
-                    outputSize++;
-                    symbolStackSize--;
-                }
-                symbolStackSize--;
-            }
-            else { // se input for +-*/^
-                while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111))
-                {
-                    if (symbolStack[symbolStackSize-1].content.symbol_char != '(') {
-                        output[outputSize] = symbolStack[symbolStackSize-1];
-                        outputSize++;
-                        symbolStackSize--;
-                    }
-                    else break;
-                }
-                symbolStack[symbolStackSize] = input.list[pos];
-                symbolStackSize++;
-            }            
-        }
-    }
-
-    while (symbolStackSize != 0)
-    {
-        output[outputSize] = symbolStack[symbolStackSize-1];
-        outputSize++;
-        symbolStackSize--;
-    }
-}
+void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
 void stackSolver(/* recebe ponteiro pra pilha */) {
     // retorna resultado
@@ -96,15 +35,11 @@ int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
     char b[] = "(3.5*15/(3+0.2)^2-1.5)";
     char c[] = "1+1";
+    char d[] = "0-1+3*(4-2)/5*(0-1)";
+    char e[] = "-3.5*15/(3+2)^2-1";
+    char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
 
-    // ARRAY a = addZeroToSpecialCases(exp);
-
-    // printf("\n%s", exp);
-    // printf("\n%s", a.values);
-    // printf("\nexp: %d", strlen(exp));
-    // printf("\na:   %d", strlen(a.values));
-
-    ELEMENT_LIST structuredExp = transformCharToStruct(a);
+    ELEMENT_LIST structuredExp = transformCharToStruct(d);
     printf("\n");
     for (int i = 0; i < structuredExp.size; i++)
     {
@@ -137,6 +72,130 @@ int main() {
     return 0;
 }
 
+// FUNÇÕES PRONTAS
+
+int hasSyntaxError(char exp[]) {
+    char pos = 1;
+    char openedBrackets = 0;
+    char dotsOfCurrentNumber = 0;
+
+    if (exp[0] == '*' || exp[0] == '/' || 
+        exp[0] == '^' || exp[0] == ')' || 
+        exp[0] == '\0') return 1;
+
+    if (exp[0] == '(') openedBrackets++;
+
+    while (exp[pos] != '\0') {
+        if (exp[pos] == '.') {
+            dotsOfCurrentNumber++;
+            if (dotsOfCurrentNumber > 1) return 1;
+        }
+        else
+            if (exp[pos] < '0' || exp[pos] > '9') dotsOfCurrentNumber = 0;
+
+        if (exp[pos] >= '0' && exp[pos] <= '9' &&
+        (exp[pos-1] == ')' || exp[pos+1] == '(')
+        ) return 1;
+        
+        else if (exp[pos] == '.'
+        && (exp[pos+1] < '0' || exp[pos+1] > '9')
+        ) return 1;
+
+        else if (exp[pos] == '+' || exp[pos] == '-')
+        {
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
+            && (exp[pos-1] < '(' || exp[pos-1] > ')')
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && exp[pos+1] != '(' && exp[pos+1] != '.'
+            ) return 1;
+        }
+
+        else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
+        {
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9')
+            && (exp[pos-1] != ')')
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && (exp[pos+1] != '(')
+            ) return 1;
+        }
+
+        else if (exp[pos] == '(')
+        {
+            openedBrackets++;
+            if (exp[pos-1] != '+' && exp[pos-1] != '-'
+            && exp[pos-1] != '*' && exp[pos-1] != '/'
+            && exp[pos-1] != '^' && exp[pos-1] != '('
+            || (exp[pos+1] < '0' || exp[pos+1] > '9')
+            && exp[pos+1] != '+' && exp[pos+1] != '-'
+            && exp[pos+1] != '(' && exp[pos+1] != '.'
+            ) return 1;
+        }
+
+        else if (exp[pos] == ')')
+        {
+            openedBrackets--;
+            if ((exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')'
+            || exp[pos+1] != '+' && exp[pos+1] != '-'
+            && exp[pos+1] != '*' && exp[pos+1] != '/'
+            && exp[pos+1] != '^' && exp[pos+1] != ')'
+            && exp[pos+1] != '\0'
+            ) return 1;
+        }
+
+        if (exp[pos+1] == '\0'
+            && (exp[pos] < '0' || exp[pos] > '9')
+            && exp[pos] != ')') return 1;
+
+        pos++;
+    }
+
+    return openedBrackets ? 1 : 0;
+}
+
+void addZeroToSpecialCases(char exp[], ARRAY *expWithZeros) {
+
+    char zerosToAdd = 0;
+    char inputSize = 1;
+    char pos = 1;
+    (*expWithZeros).size = 0;
+
+    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-') 
+        zerosToAdd++;
+
+    while (exp[pos] != '\0') {
+        if ((exp[pos] == '.' || exp[pos] == '+' || exp[pos] == '-') && (exp[pos-1] < '0' || exp[pos-1] > '9')) {
+            zerosToAdd++;
+        }
+        inputSize++;
+        pos++;
+    }
+
+    (*expWithZeros).values[inputSize+zerosToAdd];
+    (*expWithZeros).values[inputSize+zerosToAdd] = '\0';
+
+    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
+    {
+        (*expWithZeros).values[0] = '0';
+        (*expWithZeros).values[1] = exp[0];
+        (*expWithZeros).size += 2;
+    }
+    else (*expWithZeros).values[(*expWithZeros).size++] = exp[0];
+
+    pos = 1;
+
+    while (exp[pos] != '\0') {
+        if (((exp[pos] == '+' || exp[pos] == '-') 
+        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
+        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
+        {
+            (*expWithZeros).values[(*expWithZeros).size++] = '0';
+            (*expWithZeros).values[(*expWithZeros).size++] = exp[pos];
+        }
+        else (*expWithZeros).values[(*expWithZeros).size++] = exp[pos];
+        pos++;
+    }
+}
+
 ELEMENT_LIST transformCharToStruct(char* exp) {
     ELEMENT_LIST elementList;
     elementList.list = malloc(sizeof(EXPRESSION_ELEMENT));
@@ -149,9 +208,9 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
     char* currentNumber = calloc(1, sizeof(char));
 
     while (exp[pos] != '\0') {
-        // .0123456789
+        // se pos for numérico
         if (exp[pos] >= '0' && exp[pos] <= '9' || exp[pos] == '.') {
-            currentNumberLength++; // 2
+            currentNumberLength++;
             currentNumber = realloc(currentNumber, currentNumberLength+1);
             currentNumber[currentNumberLength-1] = exp[pos];
             currentNumber[currentNumberLength] = '\0';
@@ -175,7 +234,7 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 if(number.flags & 1 << 7)
                     number.content.number_double = atof(currentNumber);
                 else
-                    number.content.number_int = atol(currentNumber);
+                    number.content.number_int = atoll(currentNumber);
 
                 elementList.size++;
                 elementList.RPNExpSize++;
@@ -189,27 +248,26 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 currentNumber[0] = '\0';
             }
         }
-        else {
-            if (exp[pos] == '(' || exp[pos] == ')') {
-                EXPRESSION_ELEMENT symbol;
-                symbol.flags = 0b00000100;
-                symbol.content.symbol_char = exp[pos];
+        else if (exp[pos] == '(' || exp[pos] == ')') {
+            EXPRESSION_ELEMENT symbol;
+            symbol.flags = 0b00000100;
+            symbol.content.symbol_char = exp[pos];
 
-                elementList.size++;
-                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
-                elementList.list[elementList.size-1] = symbol;
+            elementList.size++;
+            elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+            elementList.list[elementList.size-1] = symbol;
 
-                if(exp[pos] == '(') elementList.symbolStackSize++;
-            }
-            else // +-*/^
+            if(exp[pos] == '(') elementList.symbolStackSize++;
+        }
+        else // +-*/^
+        {
+            EXPRESSION_ELEMENT symbol;
+
+            symbol.flags = 0;
+            symbol.content.symbol_char = exp[pos];
+            
+            switch (exp[pos])
             {
-                EXPRESSION_ELEMENT symbol;
-
-                symbol.flags = 0;
-                symbol.content.symbol_char = exp[pos];
-                
-                switch (exp[pos])
-                {
                 case '^':
                     symbol.flags |= 1 << 1;
                     symbol.flags |= 1 << 0;
@@ -221,17 +279,56 @@ ELEMENT_LIST transformCharToStruct(char* exp) {
                 default:
                     symbol.flags |= 1 << 0;
                     break;
-                }
-
-                elementList.size++;
-                elementList.RPNExpSize++;
-                elementList.symbolStackSize++;
-                elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
-                elementList.list[elementList.size-1] = symbol;
             }
+
+            elementList.size++;
+            elementList.RPNExpSize++;
+            elementList.symbolStackSize++;
+            elementList.list = realloc(elementList.list, elementList.size * sizeof(EXPRESSION_ELEMENT));
+            elementList.list[elementList.size-1] = symbol;
         }
         pos++;        
     }
     free(currentNumber);
     return elementList;
+}
+
+void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
+    EXPRESSION_ELEMENT symbolStack[input.symbolStackSize];
+    char symbolStackSize = 0;
+    char outputSize = 0;
+
+    for (int pos = 0; pos < input.size; pos++)
+    {
+        EXPRESSION_ELEMENT element = input.list[pos];
+        unsigned char flags = element.flags;
+
+        if (!(flags & 0b00000111)) // se for número
+            output[outputSize++] = input.list[pos];
+        else if (symbolStackSize == 0)
+            symbolStack[symbolStackSize++] = input.list[pos];
+        else
+        {
+            if (input.list[pos].content.symbol_char == '(')
+                symbolStack[symbolStackSize++] = input.list[pos];
+            else if (input.list[pos].content.symbol_char == ')')
+            {
+                while (symbolStack[symbolStackSize-1].content.symbol_char != '(')
+                    output[outputSize++] = symbolStack[--symbolStackSize];
+                symbolStackSize--;
+            }
+            else { // se input for +-*/^
+                while ((input.list[pos].flags & 0b00000111) <= (symbolStack[symbolStackSize-1].flags & 0b00000111) && symbolStackSize > 0)
+                    if (symbolStack[symbolStackSize-1].content.symbol_char != '(')
+                        output[outputSize++] = symbolStack[--symbolStackSize];
+                    else break;
+                symbolStack[symbolStackSize++] = input.list[pos];
+            }            
+        }
+    }
+
+    while (symbolStackSize != 0)
+        output[outputSize++] = symbolStack[--symbolStackSize];
+
+    output[outputSize-1].flags |= 0b01000000;
 }
