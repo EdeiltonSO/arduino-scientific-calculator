@@ -52,24 +52,23 @@ shift (pra inversa das funções abaixo)
 - trocar o botão clear por segurar o backspace?
 - como limitar a entrada de inteiros maiores que o permitido?
 - o tamanho do lado esquerdo do float é um problema a ser resolvido?
-- limitar a entrada de mais de 6 casas decimais após a vírgula?
-- o que acontece com a ordem de precedência ao adicionar o zero em `-3.5*15`?´
-- trocar condicionais complexas por diretivas define?
+- a ordem de precedência se mantém ao adicionar zero em qualquer caso?¹
 
-## Outras decisões
-- não haverá tecla pra constante pi (usuário digitará manualmente)
-- não haverá tecla pra constante e (usuário fará e^1)
-- por enquanto sem função pra integral definida
+¹sim, mas somente quando `hasSyntaxError` e `transformCharToStruct` são utilizadas em conjunto
 
-## Melhorias futuras
+## Problemas futuros
 - tratar sintax error pra press = com string vazia (ignorar tentativa)
 - ler um float com "qualquer" precisão e calcular como notação científica
 - mapear erros possíveis e separar em categorias (return 1, return 2, etc)
 - alternar entre graus e radianos (quando tiver função trigonométrica)
+- trocar condicionais complexas por diretivas define
 - permitir que o usuário calcule "1(1+1)"
 - implementar raízes de índice N
 
-## Documentação
+## Coisas a documentar
+- constante `e` obtida com `e^1`
+- constante `π` obtida digitando manualmente (6 casas de precisão)
+- precisão arredondada em números com mais de 6 casas decimais após a vírgula
 - explicar limitação de 6 casas decimais para float
 - fazer tabela com prioridades dos elementos
 - explicar flags do `EXPRESSION_ELEMENT`
