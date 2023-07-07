@@ -27,7 +27,7 @@ void addZeroToSpecialCases(char *, ARRAY *);
 ELEMENT_LIST transformCharToStruct(char *);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-void stackSolver(/* recebe ponteiro pra pilha */) {
+double stackSolver() {
     // retorna resultado
 }
 
@@ -35,11 +35,20 @@ int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
     char b[] = "(3.5*15/(3+0.2)^2-1.5)";
     char c[] = "1+1";
-    char d[] = "0-1+3*(4-2)/5*(0-1)";
+    char d[] = "-1+3*(4-2)/5*(-1)";
     char e[] = "-3.5*15/(3+2)^2-1";
     char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    ARRAY inputWithZeros;
 
-    ELEMENT_LIST structuredExp = transformCharToStruct(d);
+    // SYNTA ERROR
+    printf("\n%s", d);
+    if (hasSyntaxError(d)) { printf("\nsyntax error\n\n"); return 1; }
+
+    // ADD ZEROS
+    addZeroToSpecialCases(d, &inputWithZeros);
+
+    // TRANSFORM TO STRUCT
+    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
     printf("\n");
     for (int i = 0; i < structuredExp.size; i++)
     {
@@ -51,9 +60,9 @@ int main() {
         else printf("%c ", element.content.symbol_char);
     }
 
+    // CREATE RPN STACK
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
-
     printf("\n");
     unsigned char flags;
     EXPRESSION_ELEMENT element;

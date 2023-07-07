@@ -54,7 +54,7 @@ shift (pra inversa das funções abaixo)
 - o tamanho do lado esquerdo do float é um problema a ser resolvido?
 - a ordem de precedência se mantém ao adicionar zero em qualquer caso?¹
 
-¹sim, mas somente quando a expressao é validada por `hasSyntaxError`
+¹sim, mas somente quando a expressão é validada por `hasSyntaxError`
 
 ## Problemas futuros
 - tratar sintax error pra press = com string vazia (ignorar tentativa)
