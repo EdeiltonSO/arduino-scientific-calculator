@@ -161,46 +161,46 @@ int hasSyntaxError(char exp[]) {
     return openedBrackets ? 1 : 0;
 }
 
-void addZeroToSpecialCases(char exp[], ARRAY *expWithZeros) {
+void addZeroToSpecialCases(char input[], ARRAY *output) {
 
     char zerosToAdd = 0;
     char inputSize = 1;
     char pos = 1;
-    (*expWithZeros).size = 0;
+    (*output).size = 0;
 
-    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-') 
+    if (input[0] == '.' || input[0] == '+' || input[0] == '-') 
         zerosToAdd++;
 
-    while (exp[pos] != '\0') {
-        if ((exp[pos] == '.' || exp[pos] == '+' || exp[pos] == '-') && (exp[pos-1] < '0' || exp[pos-1] > '9')) {
+    while (input[pos] != '\0') {
+        if ((input[pos] == '.' || input[pos] == '+' || input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9')) {
             zerosToAdd++;
         }
         inputSize++;
         pos++;
     }
 
-    (*expWithZeros).values[inputSize+zerosToAdd];
-    (*expWithZeros).values[inputSize+zerosToAdd] = '\0';
+    (*output).values[inputSize+zerosToAdd];
+    (*output).values[inputSize+zerosToAdd] = '\0';
 
-    if (exp[0] == '.' || exp[0] == '+' || exp[0] == '-')
+    if (input[0] == '.' || input[0] == '+' || input[0] == '-')
     {
-        (*expWithZeros).values[0] = '0';
-        (*expWithZeros).values[1] = exp[0];
-        (*expWithZeros).size += 2;
+        (*output).values[0] = '0';
+        (*output).values[1] = input[0];
+        (*output).size += 2;
     }
-    else (*expWithZeros).values[(*expWithZeros).size++] = exp[0];
+    else (*output).values[(*output).size++] = input[0];
 
     pos = 1;
 
-    while (exp[pos] != '\0') {
-        if (((exp[pos] == '+' || exp[pos] == '-') 
-        && (exp[pos-1] < '0' || exp[pos-1] > '9') && exp[pos-1] != ')')
-        || (exp[pos] == '.' && (exp[pos-1] < '0' || exp[pos-1] > '9')))
+    while (input[pos] != '\0') {
+        if (((input[pos] == '+' || input[pos] == '-') 
+        && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
+        || (input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9')))
         {
-            (*expWithZeros).values[(*expWithZeros).size++] = '0';
-            (*expWithZeros).values[(*expWithZeros).size++] = exp[pos];
+            (*output).values[(*output).size++] = '0';
+            (*output).values[(*output).size++] = input[pos];
         }
-        else (*expWithZeros).values[(*expWithZeros).size++] = exp[pos];
+        else (*output).values[(*output).size++] = input[pos];
         pos++;
     }
 }
