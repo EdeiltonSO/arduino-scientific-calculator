@@ -22,6 +22,32 @@ typedef struct {
     char* values;
 } ARRAY;
 
+void printElementList(ELEMENT_LIST elementList) {
+    for (int i = 0; i < elementList.size; i++)
+    {
+        EXPRESSION_ELEMENT element = elementList.list[i];
+        unsigned char flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%d ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+}
+
+void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
+    unsigned char flags;
+    EXPRESSION_ELEMENT element;
+    for (int i = 0; i < rpnSize; i++)
+    {
+        element = rpnStack[i];
+        flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%i ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+}
+
 int hasSyntaxError(char *);
 void addZeroToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
@@ -48,33 +74,15 @@ int main() {
     addZeroToSpecialCases(d, &inputWithZeros);
 
     // TRANSFORM TO STRUCT
-    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
     printf("\n");
-    for (int i = 0; i < structuredExp.size; i++)
-    {
-        EXPRESSION_ELEMENT element = structuredExp.list[i];
-        unsigned char flags = element.flags;
-
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%d ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
+    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
+    printElementList(structuredExp);
 
     // CREATE RPN STACK
+    printf("\n");
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
-    printf("\n");
-    unsigned char flags;
-    EXPRESSION_ELEMENT element;
-    for (int i = 0; i < structuredExp.RPNExpSize; i++)
-    {
-        element = rpnStack[i];
-        flags = element.flags;
-
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%i ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
+    printExpElementArray(rpnStack, structuredExp.RPNExpSize);
     
     printf("\n\n");
 
