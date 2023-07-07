@@ -23,12 +23,12 @@ typedef struct {
 } ARRAY;
 
 int hasSyntaxError(char *);
-void addZeroToSpecialCases(char *, ARRAY *);
-ELEMENT_LIST transformCharToStruct(char *);
+void addZeroToSpecialCases(char[], ARRAY *);
+ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-double stackSolver() {
-    // retorna resultado
+double stackSolver(EXPRESSION_ELEMENT rpnStack[]) {
+    
 }
 
 int main() {
@@ -205,7 +205,7 @@ void addZeroToSpecialCases(char input[], ARRAY *output) {
     }
 }
 
-ELEMENT_LIST transformCharToStruct(char* exp) {
+ELEMENT_LIST transformCharToStruct(char exp[]) {
     ELEMENT_LIST elementList;
     elementList.list = malloc(sizeof(EXPRESSION_ELEMENT));
     elementList.symbolStackSize = 0;
