@@ -40,7 +40,7 @@ int main() {
     char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
     ARRAY inputWithZeros;
 
-    // SYNTA ERROR
+    // SYNTAX ERROR
     printf("\n%s", d);
     if (hasSyntaxError(d)) { printf("\nsyntax error\n\n"); return 1; }
 
