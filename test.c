@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#define  INT_FLOAT   ((numStack[topStack-2].flags & 1 << 7) == 0x00) && ((numStack[topStack-1].flags & 1 << 7) == 0x80)
+#define  FLOAT_INT   ((numStack[topStack-2].flags & 1 << 7) == 0x80) && ((numStack[topStack-1].flags & 1 << 7) == 0x00)
+#define  FLOAT_FLOAT ((numStack[topStack-2].flags & 1 << 7) == 0x80) && ((numStack[topStack-1].flags & 1 << 7) == 0x80)
 
 typedef struct {
     unsigned char flags;
@@ -22,13 +26,206 @@ typedef struct {
     char* values;
 } ARRAY;
 
+void printElementList(ELEMENT_LIST elementList) {
+    for (int i = 0; i < elementList.size; i++)
+    {
+        EXPRESSION_ELEMENT element = elementList.list[i];
+        unsigned char flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%d ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+}
+
+void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
+    unsigned char flags;
+    EXPRESSION_ELEMENT element;
+    for (int i = 0; i < rpnSize; i++)
+    {
+        element = rpnStack[i];
+        flags = element.flags;
+
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        else if (!(flags | 0)) printf("%i ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+}
+
 int hasSyntaxError(char *);
 void addZeroToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-double stackSolver(EXPRESSION_ELEMENT rpnStack[]) {
-    
+EXPRESSION_ELEMENT RPNStackSolver(EXPRESSION_ELEMENT rpnStack[]) {
+    char pos = 0;
+    char topStack = -1;
+
+    do { if ((rpnStack[pos].flags & 0b00000111) == 0) topStack++;
+    } while ((rpnStack[pos++].flags & 1 << 6) != 0b01000000);
+
+    EXPRESSION_ELEMENT numStack[++topStack];
+
+    // printf("\ntopStack: %d\n", topStack);
+
+    pos = 0;
+    topStack = -1;
+    do {
+        if ((rpnStack[pos].flags & 0b00000111) == 0) {
+            printf("\nNUMBER");
+            numStack[++topStack] = rpnStack[pos];
+        }
+        else {
+            EXPRESSION_ELEMENT result;
+
+            // se algum for float
+            // if (INT_FLOAT) {
+            //         printf("\nINT_FLOAT");
+            //         result.flags = 0b10000000;
+            //         switch (rpnStack[pos].content.symbol_char)
+            //         {
+            //             case '+':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_int 
+            //                     + numStack[topStack--].content.number_double;
+            //                 break;
+            //             case '-':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_int 
+            //                     - numStack[topStack--].content.number_double;
+            //                 break;
+            //             case '*':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_int 
+            //                     * numStack[topStack--].content.number_double;
+            //                 break;
+            //             case '/':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_int 
+            //                     / numStack[topStack--].content.number_double;
+            //                 break;
+            //             case '^':
+            //                 result.content.number_double 
+            //                     = pow(numStack[topStack--].content.number_int, numStack[topStack--].content.number_double);
+            //                 break;
+            //             default:
+            //                 break;
+            //         }
+            //         printf("\n%f", result.content.number_double);
+            // }
+            // else if (FLOAT_INT) {
+            //         printf("\nFLOAT_INT");
+            //         result.flags = 0b10000000;
+            //         switch (rpnStack[pos].content.symbol_char)
+            //         {
+            //             case '+':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_double 
+            //                     + numStack[topStack--].content.number_int;
+            //                 break;
+            //             case '-':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_double 
+            //                     - numStack[topStack--].content.number_int;
+            //                 break;
+            //             case '*':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_double
+            //                     * numStack[topStack--].content.number_int;
+            //                 break;
+            //             case '/':
+            //                 result.content.number_double 
+            //                     = numStack[topStack--].content.number_double
+            //                     / numStack[topStack--].content.number_int;
+            //                 break;
+            //             case '^':
+            //                 result.content.number_double 
+            //                     = pow(numStack[topStack--].content.number_double, numStack[topStack--].content.number_int);
+            //                 break;
+            //             default:
+            //                 break;
+            //         }
+            //         printf("\n%f", result.content.number_double);
+            // }
+            // else if (FLOAT_FLOAT) {
+            //     printf("\nFLOAT_FLOAT");
+            //     result.flags = 0b10000000;
+            //     switch (rpnStack[pos].content.symbol_char)
+            //     {
+            //         case '+':
+            //             result.content.number_double 
+            //                 = numStack[topStack--].content.number_double
+            //                 + numStack[topStack--].content.number_double;
+            //             break;
+            //         case '-':
+            //             result.content.number_double 
+            //                 = numStack[topStack--].content.number_double
+            //                 - numStack[topStack--].content.number_double;
+            //             break;
+            //         case '*':
+            //             result.content.number_double 
+            //                 = numStack[topStack--].content.number_double
+            //                 * numStack[topStack--].content.number_double;
+            //             break;
+            //         case '/':
+            //             result.content.number_double 
+            //                 = numStack[topStack--].content.number_double
+            //                 / numStack[topStack--].content.number_double;
+            //             break;
+            //         case '^':
+            //             result.content.number_double 
+            //                 = pow(numStack[topStack--].content.number_double, numStack[topStack--].content.number_double);
+            //             break;
+            //         default:
+            //             break;
+            //     }
+            //     printf("\n%f", result.content.number_double);
+            // }
+            if (0)
+                printf("a");
+            else { // se ambos forem inteiros
+                printf("\nCHAR");
+                printf("\nINT_INT: %d%c%d=", 
+                    numStack[topStack-1].content.number_int,
+                    rpnStack[pos].content.symbol_char,
+                    numStack[topStack].content.number_int);
+
+                result.flags = 0;
+                switch (rpnStack[pos].content.symbol_char)
+                {
+                    case '+':
+                        result.content.number_int = numStack[topStack-1].content.number_int + numStack[topStack].content.number_int;
+                            topStack -= 2;
+                        break;
+                    case '-':
+                        result.content.number_int = numStack[topStack-1].content.number_int - numStack[topStack].content.number_int;
+                            topStack -= 2;
+                        break;
+                    case '*':
+                        result.content.number_int = numStack[topStack-1].content.number_int * numStack[topStack].content.number_int;
+                            topStack -= 2;
+                        break;
+                    case '/':
+                        result.content.number_int = numStack[topStack-1].content.number_int / numStack[topStack].content.number_int;
+                            topStack -= 2;
+                        break;
+                    case '^':
+                        result.content.number_int = pow(numStack[topStack-1].content.number_int, numStack[topStack].content.number_int);
+                            topStack -= 2;
+                        break;
+                    default:
+                        break;
+                }
+                printf("%d", result.content.number_int);
+            }
+            numStack[++topStack] = result;
+            // retire o penúltimo e o último operando da pilha
+            // faça a operação que se pede entre eles
+            // coloque o resultado de volta na pilha
+        }
+    } while ((rpnStack[pos++].flags & 1 << 6) != 0b01000000);
+
+    return numStack[0];
 }
 
 int main() {
@@ -48,34 +245,26 @@ int main() {
     addZeroToSpecialCases(d, &inputWithZeros);
 
     // TRANSFORM TO STRUCT
-    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
     printf("\n");
-    for (int i = 0; i < structuredExp.size; i++)
-    {
-        EXPRESSION_ELEMENT element = structuredExp.list[i];
-        unsigned char flags = element.flags;
-
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%d ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
+    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
+    printElementList(structuredExp);
 
     // CREATE RPN STACK
+    printf("\n");
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
-    printf("\n");
-    unsigned char flags;
-    EXPRESSION_ELEMENT element;
-    for (int i = 0; i < structuredExp.RPNExpSize; i++)
-    {
-        element = rpnStack[i];
-        flags = element.flags;
-
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%i ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
+    printExpElementArray(rpnStack, structuredExp.RPNExpSize);
     
+    // STACK SOLVER
+    printf("\n");
+    EXPRESSION_ELEMENT result = RPNStackSolver(rpnStack);
+
+    if (result.flags == 0)
+        printf("\nRESULTADO = %d", result.content.number_int);
+    else
+        printf("\nRESULTADO = %f", result.content.number_double);
+    
+
     printf("\n\n");
 
     return 0;
