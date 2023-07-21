@@ -94,12 +94,30 @@ EXPRESSION_ELEMENT RPNStackSolver(EXPRESSION_ELEMENT rpnStack[]) {
             printExpElement(numStack[topStack-1]);
             printExpElement(rpnStack[pos]);
             printExpElement(numStack[topStack]);
-            topStack-=2;
             EXPRESSION_ELEMENT result;
-            
-            // result.content.number_X = a.content.number_X ? b.content.number_X;
-            // result.flags = 0b?0000000;
 
+            switch (rpnStack[pos].content.symbol_char) {
+                case '+':
+                    result.content.number_int = numStack[topStack-1].content.number_int + numStack[topStack].content.number_int;
+                    break;
+                case '-':
+                    result.content.number_int = numStack[topStack-1].content.number_int - numStack[topStack].content.number_int;
+                    break;
+                case '*':
+                    result.content.number_int = numStack[topStack-1].content.number_int * numStack[topStack].content.number_int;
+                    break;
+                // case '/':
+                //     result.content.number_int = numStack[topStack-1].content.number_int / numStack[topStack].content.number_int;
+                //     break;
+                // case '^':
+                //     result.content.number_int = numStack[topStack-1].content.number_int ^ numStack[topStack].content.number_int;
+                //     break;       
+                default:
+                    break;
+            }            
+            result.flags = 0;
+
+            topStack-=2;
             numStack[++topStack] = result;
         }
     } while ((rpnStack[pos++].flags & 1 << 6) != 0b01000000);
@@ -111,7 +129,7 @@ int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
     char b[] = "(3.5*15/(3+0.2)^2-1.5)";
     char c[] = "1+1";
-    char d[] = "-1+3*(4-2)/5*(-1)";
+    char d[] = "-1+3*(4-2)*5*(-1)";
     char e[] = "-3.5*15/(3+2)^2-1";
     char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
     ARRAY inputWithZeros;
