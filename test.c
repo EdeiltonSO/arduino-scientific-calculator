@@ -129,18 +129,19 @@ int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
     char b[] = "(3.5*15/(3+0.2)^2-1.5)";
     char c[] = "1+1";
-    char d[] = "-1+3*(4-2)*5*(-1)";
+    char d[] = "-1+3*(4-2)*5*(-1)"; // OK
     char e[] = "-3.5*15/(3+2)^2-1";
     char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    char g[] = "5+((1+2)*4)-3"; // ESSE CASO TA QUEBRANDO NA FUNÇÃO DE ADD ZEROS
     ARRAY inputWithZeros;
 
     // SYNTAX ERROR
-    printf("\n%s", d);
-    if (hasSyntaxError(d)) { printf("\nsyntax error\n\n"); return 1; }
+    printf("\n%s", g);
+    if (hasSyntaxError(g)) { printf("\nsyntax error\n\n"); return 1; }
 
+    printf("aaaaaaaaaaaaaaaaaaa");
     // ADD ZEROS
-    addZeroToSpecialCases(d, &inputWithZeros);
-
+    addZeroToSpecialCases(g, &inputWithZeros);
     // TRANSFORM TO STRUCT
     printf("\n");
     ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
