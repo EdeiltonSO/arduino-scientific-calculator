@@ -61,6 +61,7 @@ shift (pra inversa das funções abaixo)
 - ler um float com "qualquer" precisão e calcular como notação científica
 - mapear erros possíveis e separar em categorias (return 1, return 2, etc)
 - alternar entre graus e radianos (quando tiver função trigonométrica)
+- add verificação de tamanho de números em transformCharToStruct
 - trocar condicionais complexas por diretivas define
 - permitir que o usuário calcule "1(1+1)"
 - implementar raízes de índice N
