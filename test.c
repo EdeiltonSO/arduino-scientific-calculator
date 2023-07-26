@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <limits.h>
+#include <float.h>
+
 #define  INT_FLOAT   ((numStack[topStack-1].flags & 1 << 7) == 0x00) && ((numStack[topStack].flags & 1 << 7) == 0x80)
 #define  FLOAT_INT   ((numStack[topStack-1].flags & 1 << 7) == 0x80) && ((numStack[topStack].flags & 1 << 7) == 0x00)
 #define  FLOAT_FLOAT ((numStack[topStack-1].flags & 1 << 7) == 0x80) && ((numStack[topStack].flags & 1 << 7) == 0x80)
 #define  IS_DIVISION rpnStack[pos].content.symbol_char == '/'
+
 typedef struct {
     unsigned char flags;
     union {
@@ -37,7 +40,6 @@ void printElementList(ELEMENT_LIST elementList) {
         else printf("%c ", element.content.symbol_char);
     }
 }
-
 void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
     unsigned char flags;
     EXPRESSION_ELEMENT element;
@@ -51,7 +53,6 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
         else printf("%c ", element.content.symbol_char);
     }
 }
-
 void printExpElement(EXPRESSION_ELEMENT element) {
     unsigned char flags;
     flags = element.flags;
@@ -59,6 +60,17 @@ void printExpElement(EXPRESSION_ELEMENT element) {
     else if (!(flags | 0)) printf("%i", element.content.number_int);
     else printf("%c", element.content.symbol_char);
 }
+
+EXPRESSION_ELEMENT sum(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
+    // validar limite de representação
+    // verificar tipo
+    // operar
+    // retornar
+}
+EXPRESSION_ELEMENT subtraction(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b);
+EXPRESSION_ELEMENT multiplication(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b);
+EXPRESSION_ELEMENT division(EXPRESSION_ELEMENT num, EXPRESSION_ELEMENT den);
+EXPRESSION_ELEMENT power(EXPRESSION_ELEMENT base, EXPRESSION_ELEMENT exponent);
 
 int hasSyntaxError(char *);
 void addZeroToSpecialCases(char[], ARRAY *);
@@ -98,20 +110,20 @@ EXPRESSION_ELEMENT RPNStackSolver(EXPRESSION_ELEMENT rpnStack[]) {
 
             switch (rpnStack[pos].content.symbol_char) {
                 case '+':
-                    result.content.number_int = numStack[topStack-1].content.number_int + numStack[topStack].content.number_int;
+                    result = sum(numStack[topStack-1], numStack[topStack]);
                     break;
                 case '-':
-                    result.content.number_int = numStack[topStack-1].content.number_int - numStack[topStack].content.number_int;
+                    result = subtraction(numStack[topStack-1], numStack[topStack]);
                     break;
                 case '*':
-                    result.content.number_int = numStack[topStack-1].content.number_int * numStack[topStack].content.number_int;
+                    result = multiplication(numStack[topStack-1], numStack[topStack]);
                     break;
-                // case '/':
-                //     result.content.number_int = numStack[topStack-1].content.number_int / numStack[topStack].content.number_int;
-                //     break;
-                // case '^':
-                //     result.content.number_int = numStack[topStack-1].content.number_int ^ numStack[topStack].content.number_int;
-                //     break;       
+                case '/':
+                    result = division(numStack[topStack-1], numStack[topStack]);
+                    break;
+                case '^':
+                    result = power(numStack[topStack-1], numStack[topStack]);
+                    break;       
                 default:
                     break;
             }            
