@@ -66,11 +66,25 @@ EXPRESSION_ELEMENT sum(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
     // verificar tipo
     // operar
     // retornar
+    EXPRESSION_ELEMENT r;
+    r.flags = 0;
+    r.content.number_int = a.content.number_int + b.content.number_int;
+    return r;
 }
-EXPRESSION_ELEMENT subtraction(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b);
-EXPRESSION_ELEMENT multiplication(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b);
-EXPRESSION_ELEMENT division(EXPRESSION_ELEMENT num, EXPRESSION_ELEMENT den);
-EXPRESSION_ELEMENT power(EXPRESSION_ELEMENT base, EXPRESSION_ELEMENT exponent);
+EXPRESSION_ELEMENT subtraction(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
+    EXPRESSION_ELEMENT r;
+    r.flags = 0;
+    r.content.number_int = a.content.number_int - b.content.number_int;
+    return r;
+}
+EXPRESSION_ELEMENT multiplication(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
+    EXPRESSION_ELEMENT r;
+    r.flags = 0;
+    r.content.number_int = a.content.number_int * b.content.number_int;
+    return r;
+}
+// EXPRESSION_ELEMENT division(EXPRESSION_ELEMENT num, EXPRESSION_ELEMENT den);
+// EXPRESSION_ELEMENT power(EXPRESSION_ELEMENT base, EXPRESSION_ELEMENT exponent);
 
 int hasSyntaxError(char *);
 void addZeroToSpecialCases(char[], ARRAY *);
@@ -119,10 +133,10 @@ EXPRESSION_ELEMENT RPNStackSolver(EXPRESSION_ELEMENT rpnStack[]) {
                     result = multiplication(numStack[topStack-1], numStack[topStack]);
                     break;
                 case '/':
-                    result = division(numStack[topStack-1], numStack[topStack]);
+                    // result = division(numStack[topStack-1], numStack[topStack]);
                     break;
                 case '^':
-                    result = power(numStack[topStack-1], numStack[topStack]);
+                    // result = power(numStack[topStack-1], numStack[topStack]);
                     break;       
                 default:
                     break;
@@ -148,12 +162,12 @@ int main() {
     ARRAY inputWithZeros;
 
     // SYNTAX ERROR
-    printf("\n%s", g);
-    if (hasSyntaxError(g)) { printf("\nsyntax error\n\n"); return 1; }
+    printf("\n%s", d);
+    if (hasSyntaxError(d)) { printf("\nsyntax error\n\n"); return 1; }
 
     printf("aaaaaaaaaaaaaaaaaaa");
     // ADD ZEROS
-    addZeroToSpecialCases(g, &inputWithZeros);
+    addZeroToSpecialCases(d, &inputWithZeros);
     // TRANSFORM TO STRUCT
     printf("\n");
     ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);

@@ -49,7 +49,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
 }
 
 int hasSyntaxError(char *);
-void addZeroToSpecialCases(char[], ARRAY *);
+void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
@@ -58,20 +58,22 @@ double stackSolver(EXPRESSION_ELEMENT rpnStack[]) {
 }
 
 int main() {
-    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
-    char b[] = "(3.5*15/(3+0.2)^2-1.5)";
-    char c[] = "1+1";
-    char d[] = "-1+3*(4-2)/5*(-1)";
-    char e[] = "-3.5*15/(3+2)^2-1";
-    char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // printElementList fica errada
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // não chega em printElementList 
+    char c[] = "1+1"; // ok
+    char d[] = "-1+3*(4-2)/5*(-1)"; // ok
+    char e[] = "-3.5*15/(3+2)^2-1"; // erro na ordem de precedência (transformCharToStruct nao bota parenteses nos zeros adicionais, mas talvez isso deva ser responsabilidade da addCharsToSpecialCases)
+    char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // mesmo do anterior
     ARRAY inputWithZeros;
 
+    char* testeAtual = f;
+
     // SYNTAX ERROR
-    printf("\n%s", d);
-    if (hasSyntaxError(d)) { printf("\nsyntax error\n\n"); return 1; }
+    printf("\n%s", testeAtual);
+    if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); return 1; }
 
     // ADD ZEROS
-    addZeroToSpecialCases(d, &inputWithZeros);
+    addCharsToSpecialCases(testeAtual, &inputWithZeros);
 
     // TRANSFORM TO STRUCT
     printf("\n");
@@ -169,26 +171,27 @@ int hasSyntaxError(char exp[]) {
     return openedBrackets ? 1 : 0;
 }
 
-void addZeroToSpecialCases(char input[], ARRAY *output) {
+void addCharsToSpecialCases(char input[], ARRAY *output) {
 
-    char zerosToAdd = 0;
+    char charsToAdd = 0; // zeros and brackets
     char inputSize = 1;
     char pos = 1;
     (*output).size = 0;
 
     if (input[0] == '.' || input[0] == '+' || input[0] == '-') 
-        zerosToAdd++;
+        charsToAdd++;
 
     while (input[pos] != '\0') {
-        if ((input[pos] == '.' || input[pos] == '+' || input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9')) {
-            zerosToAdd++;
+        if ((input[pos] == '.' || input[pos] == '+' || input[pos] == '-') 
+        && (input[pos-1] < '0' || input[pos-1] > '9')) {
+            charsToAdd += 3;
         }
         inputSize++;
         pos++;
     }
 
-    (*output).values[inputSize+zerosToAdd];
-    (*output).values[inputSize+zerosToAdd] = '\0';
+    (*output).values[inputSize+charsToAdd];
+    (*output).values[inputSize+charsToAdd] = '\0';
 
     if (input[0] == '.' || input[0] == '+' || input[0] == '-')
     {
