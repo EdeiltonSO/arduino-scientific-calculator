@@ -42,7 +42,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
         element = rpnStack[i];
         flags = element.flags;
 
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
+        if (flags & 1 << 7) printf("%f ", element.content.number_double);
         else if (!(flags | 0)) printf("%i ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
@@ -58,18 +58,20 @@ double stackSolver(EXPRESSION_ELEMENT rpnStack[]) {
 }
 
 int main() {
-    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // printElementList fica errada
-    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // não chega em printElementList 
+    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok 
     char c[] = "1+1"; // ok
-    char d[] = "-1+3*(4-2)/5*(-1)"; // ok
-    char e[] = "-3.5*15/(3+2)^2-1"; // erro na ordem de precedência (transformCharToStruct nao bota parenteses nos zeros adicionais, mas talvez isso deva ser responsabilidade da addCharsToSpecialCases)
-    char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // mesmo do anterior
+    char d[] = "-1+3*(4-2)/5*(-1)"; // comendo caractere
+    char e[] = "-3.5*15/(3+2)^2-1"; // ok
+    char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok
+    char g[] = "-3.5*15+(-2.5+.4)"; // imprimindo lixo
+    
     ARRAY inputWithZeros;
 
-    char* testeAtual = f;
+    char* testeAtual = g;
 
     // SYNTAX ERROR
-    printf("\n%s", testeAtual);
+    printf("\n> %s", testeAtual);
     if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); return 1; }
 
     // ADD ZEROS
@@ -173,46 +175,146 @@ int hasSyntaxError(char exp[]) {
 
 void addCharsToSpecialCases(char input[], ARRAY *output) {
 
-    char charsToAdd = 0; // zeros and brackets
+    char charsToAdd = 0;
     char inputSize = 1;
+    char shift = 0;
     char pos = 1;
-    (*output).size = 0;
 
-    if (input[0] == '.' || input[0] == '+' || input[0] == '-') 
-        charsToAdd++;
+    switch (input[0])
+    {
+        case '.': charsToAdd++;  break;
+        case '+': charsToAdd--;  break;
+        case '-': charsToAdd+=3; break;
+        default:                 break;
+    }
 
     while (input[pos] != '\0') {
-        if ((input[pos] == '.' || input[pos] == '+' || input[pos] == '-') 
-        && (input[pos-1] < '0' || input[pos-1] > '9')) {
-            charsToAdd += 3;
+        if (input[pos] == '-' && input[pos-1] == '('
+        || input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9')) {
+            charsToAdd++;
         }
+
+        else if (input[pos] == '+' && input[pos-1] == '(') {
+            charsToAdd--;
+        }
+
         inputSize++;
         pos++;
     }
 
-    (*output).values[inputSize+charsToAdd];
-    (*output).values[inputSize+charsToAdd] = '\0';
+    output->size = inputSize+charsToAdd;
 
-    if (input[0] == '.' || input[0] == '+' || input[0] == '-')
-    {
-        (*output).values[0] = '0';
-        (*output).values[1] = input[0];
-        (*output).size += 2;
-    }
-    else (*output).values[(*output).size++] = input[0];
+    output->values = (char*) malloc((output->size+1) * sizeof(char));
+    output->values[output->size] = '\0';
+    
+    // -------------------------------------------------
 
     pos = 1;
 
-    while (input[pos] != '\0') {
-        if (((input[pos] == '+' || input[pos] == '-') 
-        && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
-        || (input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9')))
+    if (input[0] == '.')
+    {
+        output->values[0] = '0';
+        output->values[1] = input[0];
+
+        while (input[pos] >= '0' && input[pos] <= '9')
         {
-            (*output).values[(*output).size++] = '0';
-            (*output).values[(*output).size++] = input[pos];
+            output->values[2+shift] = input[pos];
+            shift++;
+            pos++;
         }
-        else (*output).values[(*output).size++] = input[pos];
+    }
+
+    else if (input[0] == '+') {
+        output->values[shift] = input[pos];
+        shift++;
         pos++;
+    }
+
+    else if (input[0] == '-')
+    {
+        output->values[0] = '(';
+        output->values[1] = '0';
+        output->values[2] = input[0];
+
+        while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
+        {
+            output->values[3+shift] = input[pos];
+            shift++;
+            pos++;
+        }
+        
+        output->values[3+shift] = ')';
+    }
+
+    else output->values[0] = input[0];
+
+    // -------------------------------------------------
+
+    while (input[pos] != '\0') {
+
+        if ((input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
+        {
+            // ##############################################
+            char needAnotherBracketPair = 0;
+
+            char i = pos;
+            while ((input[i+1] >= '0' && input[i+1] <= '9') || input[i+1] == '.')
+                i++;
+
+            if (input[i] != '+' && input[i] != '-' && input[i] != ')')
+            {
+                needAnotherBracketPair = 1;
+            }
+
+            if (needAnotherBracketPair) {
+                output->values[pos+shift] = '(';
+                shift++;
+            }
+            output->values[pos+shift] = '0';
+            shift++;
+            output->values[pos+shift] = input[pos];
+            pos++;
+
+            while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
+            {
+                output->values[pos+shift] = input[pos];
+                pos++;
+            }
+
+            if (needAnotherBracketPair)
+            {
+                output->values[pos+shift] = ')';
+                shift++;
+            }
+            // ##############################################
+        }
+
+        else if (input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9'))
+        {
+            output->values[pos+shift] = '0';
+            shift++;
+            output->values[pos+shift] = input[pos];
+            pos++;
+
+            while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
+            {
+                output->values[pos+shift] = input[pos];
+                pos++;
+            }
+        }
+
+        else if (input[pos] == '+' 
+        && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
+        {
+            output->values[pos+shift] = input[pos+1];
+            shift--;
+            pos++;
+        }
+        
+        else {
+            output->values[pos+shift] = input[pos];
+            pos++;
+        }
     }
 }
 
