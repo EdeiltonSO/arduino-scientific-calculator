@@ -61,14 +61,15 @@ int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
     char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok 
     char c[] = "1+1"; // ok
-    char d[] = "-1+3*(4-2)/5*(-1)"; // comendo caractere
+    char d[] = "-1*3*(4-2)/5*(-1)"; // ok
     char e[] = "-3.5*15/(3+2)^2-1"; // ok
     char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok
-    char g[] = "-3.5*15+(-2.5+.4)"; // imprimindo lixo
+    char g[] = "-3.5*15+(-2.5+.4)"; // ok
+    char h[] = "-3.5*15+(-2.5*.4)"; // ok
     
     ARRAY inputWithZeros;
 
-    char* testeAtual = g;
+    char* testeAtual = d;
 
     // SYNTAX ERROR
     printf("\n> %s", testeAtual);
@@ -136,7 +137,7 @@ int hasSyntaxError(char exp[]) {
             if ((exp[pos-1] < '0' || exp[pos-1] > '9')
             && (exp[pos-1] != ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && (exp[pos+1] != '(')
+            && (exp[pos+1] != '(') && (exp[pos+1] != '.')
             ) return 1;
         }
 
@@ -174,92 +175,22 @@ int hasSyntaxError(char exp[]) {
 }
 
 void addCharsToSpecialCases(char input[], ARRAY *output) {
-
-    char charsToAdd = 0;
-    char inputSize = 1;
     char shift = 0;
-    char pos = 1;
-
-    switch (input[0])
-    {
-        case '.': charsToAdd++;  break;
-        case '+': charsToAdd--;  break;
-        case '-': charsToAdd+=3; break;
-        default:                 break;
-    }
-
-    while (input[pos] != '\0') {
-        if (input[pos] == '-' && input[pos-1] == '('
-        || input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9')) {
-            charsToAdd++;
-        }
-
-        else if (input[pos] == '+' && input[pos-1] == '(') {
-            charsToAdd--;
-        }
-
-        inputSize++;
-        pos++;
-    }
-
-    output->size = inputSize+charsToAdd;
-
-    output->values = (char*) malloc((output->size+1) * sizeof(char));
-    output->values[output->size] = '\0';
-    
-    // -------------------------------------------------
-
-    pos = 1;
-
-    if (input[0] == '.')
-    {
-        output->values[0] = '0';
-        output->values[1] = input[0];
-
-        while (input[pos] >= '0' && input[pos] <= '9')
-        {
-            output->values[2+shift] = input[pos];
-            shift++;
-            pos++;
-        }
-    }
-
-    else if (input[0] == '+') {
-        output->values[shift] = input[pos];
-        shift++;
-        pos++;
-    }
-
-    else if (input[0] == '-')
-    {
-        output->values[0] = '(';
-        output->values[1] = '0';
-        output->values[2] = input[0];
-
-        while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
-        {
-            output->values[3+shift] = input[pos];
-            shift++;
-            pos++;
-        }
-        
-        output->values[3+shift] = ')';
-    }
-
-    else output->values[0] = input[0];
-
-    // -------------------------------------------------
+    char pos = 0;
+    output->size = 0;
 
     while (input[pos] != '\0') {
 
         if ((input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
         {
-            // ##############################################
             char needAnotherBracketPair = 0;
 
             char i = pos;
+            printf("\n>> %d", i);
             while ((input[i+1] >= '0' && input[i+1] <= '9') || input[i+1] == '.')
                 i++;
+            i++;
+            printf("\n<< %d", i);
 
             if (input[i] != '+' && input[i] != '-' && input[i] != ')')
             {
@@ -268,25 +199,28 @@ void addCharsToSpecialCases(char input[], ARRAY *output) {
 
             if (needAnotherBracketPair) {
                 output->values[pos+shift] = '(';
+                output->size++;
                 shift++;
             }
             output->values[pos+shift] = '0';
             shift++;
             output->values[pos+shift] = input[pos];
             pos++;
+            output->size+=2;
 
             while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
             {
                 output->values[pos+shift] = input[pos];
+                output->size++;
                 pos++;
             }
 
             if (needAnotherBracketPair)
             {
                 output->values[pos+shift] = ')';
+                output->size++;
                 shift++;
             }
-            // ##############################################
         }
 
         else if (input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9'))
@@ -295,10 +229,12 @@ void addCharsToSpecialCases(char input[], ARRAY *output) {
             shift++;
             output->values[pos+shift] = input[pos];
             pos++;
+            output->size+=2;
 
             while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
             {
                 output->values[pos+shift] = input[pos];
+                output->size++;
                 pos++;
             }
         }
@@ -307,15 +243,19 @@ void addCharsToSpecialCases(char input[], ARRAY *output) {
         && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
         {
             output->values[pos+shift] = input[pos+1];
+            output->size++;
             shift--;
             pos++;
         }
         
         else {
             output->values[pos+shift] = input[pos];
+            output->size++;
             pos++;
         }
     }
+
+    output->values[output->size] = '\0';
 }
 
 ELEMENT_LIST transformCharToStruct(char exp[]) {
