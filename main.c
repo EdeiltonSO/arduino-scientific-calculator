@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     unsigned char flags;
@@ -48,6 +49,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
     }
 }
 
+char countSizeAfterAddSpecialChars(char[]);
 int hasSyntaxError(char *);
 void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
@@ -66,10 +68,12 @@ int main() {
     char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok
     char g[] = "-3.5*15+(-2.5+.4)"; // ok
     char h[] = "-3.5*15+(-2.5*.4)"; // ok
+    char i[] = "-3.5-15+(-2.5*.4)"; // ok
+    char j[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.1))-20)"; // ok
     
     ARRAY inputWithZeros;
 
-    char* testeAtual = d;
+    char* testeAtual = j;
 
     // SYNTAX ERROR
     printf("\n> %s", testeAtual);
@@ -137,7 +141,7 @@ int hasSyntaxError(char exp[]) {
             if ((exp[pos-1] < '0' || exp[pos-1] > '9')
             && (exp[pos-1] != ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && (exp[pos+1] != '(') && (exp[pos+1] != '.')
+            && exp[pos+1] != '(' && exp[pos+1] != '.'
             ) return 1;
         }
 
@@ -177,22 +181,22 @@ int hasSyntaxError(char exp[]) {
 void addCharsToSpecialCases(char input[], ARRAY *output) {
     char shift = 0;
     char pos = 0;
-    output->size = 0;
+
+    output->size = countSizeAfterAddSpecialChars(input);
+    output->values = (char*) malloc((output->size+1)*sizeof(char));
+    output->values[output->size] = '\0';
 
     while (input[pos] != '\0') {
-
         if ((input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
         {
             char needAnotherBracketPair = 0;
 
             char i = pos;
-            printf("\n>> %d", i);
             while ((input[i+1] >= '0' && input[i+1] <= '9') || input[i+1] == '.')
                 i++;
             i++;
-            printf("\n<< %d", i);
 
-            if (input[i] != '+' && input[i] != '-' && input[i] != ')')
+            if (input[i] != '+' && input[i] != '-' && input[i] != ')'  && input[i] != '(')
             {
                 needAnotherBracketPair = 1;
             }
@@ -254,8 +258,6 @@ void addCharsToSpecialCases(char input[], ARRAY *output) {
             pos++;
         }
     }
-
-    output->values[output->size] = '\0';
 }
 
 ELEMENT_LIST transformCharToStruct(char exp[]) {
@@ -393,4 +395,45 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         output[outputSize++] = symbolStack[--symbolStackSize];
 
     output[outputSize-1].flags |= 0b01000000;
+}
+
+char countSizeAfterAddSpecialChars(char input[]) {
+    char inputCount = 0;
+    char shift = 0;
+    char pos = 0;
+    char i;
+
+    while (input[pos] != '\0') {
+        inputCount++;
+
+        if ((input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
+        {
+            i = pos;
+            while ((input[i+1] >= '0' && input[i+1] <= '9') || input[i+1] == '.')
+                i++;
+            i++;
+
+            if (input[i] != '+' && input[i] != '-' && input[i] != ')'  && input[i] != '(')
+                shift+=2; // ()
+            
+            shift++; // 0
+        }
+
+        else if (input[pos] == '.' 
+        && (input[pos-1] < '0' || input[pos-1] > '9'))
+        {
+            shift++; // 0
+            i = pos;
+            while (input[i] >= '0' && input[i] <= '9') i++;
+        }
+
+        else if (input[pos] == '+' 
+        && (input[pos-1] < '0' || input[pos-1] > '9') 
+        && input[pos-1] != ')')
+            shift--; // +
+        
+        pos++;
+    }
+
+    return inputCount+shift;
 }
