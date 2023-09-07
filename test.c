@@ -1,5 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <float.h>
+
+#define  INT_FLOAT   ((numStack[topStack-1].flags & 1 << 7) == 0x00) && ((numStack[topStack].flags & 1 << 7) == 0x80)
+#define  FLOAT_INT   ((numStack[topStack-1].flags & 1 << 7) == 0x80) && ((numStack[topStack].flags & 1 << 7) == 0x00)
+#define  FLOAT_FLOAT ((numStack[topStack-1].flags & 1 << 7) == 0x80) && ((numStack[topStack].flags & 1 << 7) == 0x80)
+#define  IS_DIVISION rpnStack[pos].content.symbol_char == '/'
 
 typedef struct {
     unsigned char flags;
@@ -33,7 +40,6 @@ void printElementList(ELEMENT_LIST elementList) {
         else printf("%c ", element.content.symbol_char);
     }
 }
-
 void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
     unsigned char flags;
     EXPRESSION_ELEMENT element;
@@ -42,44 +48,126 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
         element = rpnStack[i];
         flags = element.flags;
 
-        if (flags & 1 << 7) printf("%f ", element.content.number_double);
+        if(flags & 1 << 7) printf("%f ", element.content.number_double);
         else if (!(flags | 0)) printf("%i ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
 }
+void printExpElement(EXPRESSION_ELEMENT element) {
+    unsigned char flags;
+    flags = element.flags;
+    if(flags & 1 << 7) printf("%f", element.content.number_double);
+    else if (!(flags | 0)) printf("%i", element.content.number_int);
+    else printf("%c", element.content.symbol_char);
+}
 
-char countSizeAfterAddSpecialChars(char[]);
+EXPRESSION_ELEMENT sum(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
+    // validar limite de representação
+    // verificar tipo
+    // operar
+    // retornar
+    EXPRESSION_ELEMENT r;
+    r.flags = 0;
+    r.content.number_int = a.content.number_int + b.content.number_int;
+    return r;
+}
+EXPRESSION_ELEMENT subtraction(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
+    EXPRESSION_ELEMENT r;
+    r.flags = 0;
+    r.content.number_int = a.content.number_int - b.content.number_int;
+    return r;
+}
+EXPRESSION_ELEMENT multiplication(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
+    EXPRESSION_ELEMENT r;
+    r.flags = 0;
+    r.content.number_int = a.content.number_int * b.content.number_int;
+    return r;
+}
+// EXPRESSION_ELEMENT division(EXPRESSION_ELEMENT num, EXPRESSION_ELEMENT den);
+// EXPRESSION_ELEMENT power(EXPRESSION_ELEMENT base, EXPRESSION_ELEMENT exponent);
+
 int hasSyntaxError(char *);
-void addCharsToSpecialCases(char[], ARRAY *);
+void addZeroToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-double stackSolver(EXPRESSION_ELEMENT rpnStack[]) {
-    
+EXPRESSION_ELEMENT RPNStackSolver(EXPRESSION_ELEMENT rpnStack[]) {
+    char pos = 0;
+    char topStack = -1;
+
+    // dimensionando e criando a pilha de operandos
+    do { if ((rpnStack[pos].flags & 0b00000111) == 0) topStack++;
+    } while ((rpnStack[pos++].flags & 1 << 6) != 0b01000000);
+    EXPRESSION_ELEMENT numStack[++topStack];
+
+    // usando a pilha e resolvendo a RPN
+    pos = 0;
+    topStack = -1;
+    do {
+        // se for numero, joga na pilha
+        if ((rpnStack[pos].flags & 0b00000111) == 0) {
+            printf("\nnumero ");
+            printExpElement(rpnStack[pos]);
+            printf(" foi pra pilha");
+            numStack[++topStack] = rpnStack[pos];
+        }
+        // se for operador
+        else {
+            // retire o penúltimo e o último operando da pilha
+            // faça a operação que se pede entre eles
+            // coloque o resultado de volta na pilha
+            printf("\ncalcular ");
+            printExpElement(numStack[topStack-1]);
+            printExpElement(rpnStack[pos]);
+            printExpElement(numStack[topStack]);
+            EXPRESSION_ELEMENT result;
+
+            switch (rpnStack[pos].content.symbol_char) {
+                case '+':
+                    result = sum(numStack[topStack-1], numStack[topStack]);
+                    break;
+                case '-':
+                    result = subtraction(numStack[topStack-1], numStack[topStack]);
+                    break;
+                case '*':
+                    result = multiplication(numStack[topStack-1], numStack[topStack]);
+                    break;
+                case '/':
+                    // result = division(numStack[topStack-1], numStack[topStack]);
+                    break;
+                case '^':
+                    // result = power(numStack[topStack-1], numStack[topStack]);
+                    break;       
+                default:
+                    break;
+            }            
+            result.flags = 0;
+
+            topStack-=2;
+            numStack[++topStack] = result;
+        }
+    } while ((rpnStack[pos++].flags & 1 << 6) != 0b01000000);
+
+    return numStack[0];
 }
 
 int main() {
-    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
-    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok 
-    char c[] = "1+1"; // ok
-    char d[] = "-1*3*(4-2)/5*(-1)"; // ok
-    char e[] = "-3.5*15/(3+2)^2-1"; // ok
-    char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok
-    char g[] = "-3.5*15+(-2.5+.4)"; // ok
-    char h[] = "-3.5*15+(-2.5*.4)"; // ok
-    char i[] = "-3.5-15+(-2.5*.4)"; // ok
-    
+    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20";
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)";
+    char c[] = "1+1";
+    char d[] = "-1+3*(4-2)*5*(-1)"; // OK
+    char e[] = "-3.5*15/(3+2)^2-1";
+    char f[] = "(-.5+35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)";
+    char g[] = "5+((1+2)*4)-3"; // ESSE CASO TA QUEBRANDO NA FUNÇÃO DE ADD ZEROS
     ARRAY inputWithZeros;
 
-    char* testeAtual = f;
-
     // SYNTAX ERROR
-    printf("\n> %s", testeAtual);
-    if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); return 1; }
+    printf("\n%s", d);
+    if (hasSyntaxError(d)) { printf("\nsyntax error\n\n"); return 1; }
 
+    printf("aaaaaaaaaaaaaaaaaaa");
     // ADD ZEROS
-    addCharsToSpecialCases(testeAtual, &inputWithZeros);
-
+    addZeroToSpecialCases(d, &inputWithZeros);
     // TRANSFORM TO STRUCT
     printf("\n");
     ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
@@ -91,6 +179,16 @@ int main() {
     createRPNStack(structuredExp, rpnStack);
     printExpElementArray(rpnStack, structuredExp.RPNExpSize);
     
+    // STACK SOLVER
+    printf("\n");
+    EXPRESSION_ELEMENT result = RPNStackSolver(rpnStack);
+
+    if (result.flags == 0)
+        printf("\nRESULTADO = %d", result.content.number_int);
+    else
+        printf("\nRESULTADO = %f", result.content.number_double);
+    
+
     printf("\n\n");
 
     return 0;
@@ -139,7 +237,7 @@ int hasSyntaxError(char exp[]) {
             if ((exp[pos-1] < '0' || exp[pos-1] > '9')
             && (exp[pos-1] != ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
-            && exp[pos+1] != '(' && exp[pos+1] != '.'
+            && (exp[pos+1] != '(')
             ) return 1;
         }
 
@@ -176,85 +274,47 @@ int hasSyntaxError(char exp[]) {
     return openedBrackets ? 1 : 0;
 }
 
-void addCharsToSpecialCases(char input[], ARRAY *output) {
-    char shift = 0;
-    char pos = 0;
+void addZeroToSpecialCases(char input[], ARRAY *output) {
 
-    output->size = countSizeAfterAddSpecialChars(input);
-    output->values = (char*) malloc((output->size+1)*sizeof(char));
-    output->values[output->size] = '\0';
+    char zerosToAdd = 0;
+    char inputSize = 1;
+    char pos = 1;
+    (*output).size = 0;
+
+    if (input[0] == '.' || input[0] == '+' || input[0] == '-') 
+        zerosToAdd++;
 
     while (input[pos] != '\0') {
-        if ((input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
-        {
-            char needAnotherBracketPair = 0;
-
-            char i = pos;
-            while ((input[i+1] >= '0' && input[i+1] <= '9') || input[i+1] == '.')
-                i++;
-            i++;
-
-            if (input[i] != '+' && input[i] != '-' && input[i] != ')'  && input[i] != '(')
-            {
-                needAnotherBracketPair = 1;
-            }
-
-            if (needAnotherBracketPair) {
-                output->values[pos+shift] = '(';
-                output->size++;
-                shift++;
-            }
-            output->values[pos+shift] = '0';
-            shift++;
-            output->values[pos+shift] = input[pos];
-            pos++;
-            output->size+=2;
-
-            while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
-            {
-                output->values[pos+shift] = input[pos];
-                output->size++;
-                pos++;
-            }
-
-            if (needAnotherBracketPair)
-            {
-                output->values[pos+shift] = ')';
-                output->size++;
-                shift++;
-            }
+        if ((input[pos] == '.' || input[pos] == '+' || input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9')) {
+            zerosToAdd++;
         }
+        inputSize++;
+        pos++;
+    }
 
-        else if (input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9'))
-        {
-            output->values[pos+shift] = '0';
-            shift++;
-            output->values[pos+shift] = input[pos];
-            pos++;
-            output->size+=2;
+    (*output).values[inputSize+zerosToAdd];
+    (*output).values[inputSize+zerosToAdd] = '\0';
 
-            while ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')
-            {
-                output->values[pos+shift] = input[pos];
-                output->size++;
-                pos++;
-            }
-        }
+    if (input[0] == '.' || input[0] == '+' || input[0] == '-')
+    {
+        (*output).values[0] = '0';
+        (*output).values[1] = input[0];
+        (*output).size += 2;
+    }
+    else (*output).values[(*output).size++] = input[0];
 
-        else if (input[pos] == '+' 
+    pos = 1;
+
+    while (input[pos] != '\0') {
+        if (((input[pos] == '+' || input[pos] == '-') 
         && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
+        || (input[pos] == '.' && (input[pos-1] < '0' || input[pos-1] > '9')))
         {
-            output->values[pos+shift] = input[pos+1];
-            output->size++;
-            shift--;
-            pos++;
+            (*output).values[(*output).size++] = '0';
+            (*output).values[(*output).size++] = input[pos];
         }
-        
-        else {
-            output->values[pos+shift] = input[pos];
-            output->size++;
-            pos++;
-        }
+        else (*output).values[(*output).size++] = input[pos];
+        pos++;
     }
 }
 
@@ -393,45 +453,4 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         output[outputSize++] = symbolStack[--symbolStackSize];
 
     output[outputSize-1].flags |= 0b01000000;
-}
-
-char countSizeAfterAddSpecialChars(char input[]) {
-    char inputCount = 0;
-    char shift = 0;
-    char pos = 0;
-    char i;
-
-    while (input[pos] != '\0') {
-        inputCount++;
-
-        if ((input[pos] == '-') && (input[pos-1] < '0' || input[pos-1] > '9') && input[pos-1] != ')')
-        {
-            i = pos;
-            while ((input[i+1] >= '0' && input[i+1] <= '9') || input[i+1] == '.')
-                i++;
-            i++;
-
-            if (input[i] != '+' && input[i] != '-' && input[i] != ')'  && input[i] != '(')
-                shift+=2; // ()
-            
-            shift++; // 0
-        }
-
-        else if (input[pos] == '.' 
-        && (input[pos-1] < '0' || input[pos-1] > '9'))
-        {
-            shift++; // 0
-            i = pos;
-            while (input[i] >= '0' && input[i] <= '9') i++;
-        }
-
-        else if (input[pos] == '+' 
-        && (input[pos-1] < '0' || input[pos-1] > '9') 
-        && input[pos-1] != ')')
-            shift--; // +
-        
-        pos++;
-    }
-
-    return inputCount+shift;
 }
