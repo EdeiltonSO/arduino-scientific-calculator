@@ -68,11 +68,10 @@ int main() {
     char g[] = "-3.5*15+(-2.5+.4)"; // ok
     char h[] = "-3.5*15+(-2.5*.4)"; // ok
     char i[] = "-3.5-15+(-2.5*.4)"; // ok
-    char j[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.1))-20)"; // ok
     
     ARRAY inputWithZeros;
 
-    char* testeAtual = j;
+    char* testeAtual = f;
 
     // SYNTAX ERROR
     printf("\n> %s", testeAtual);
