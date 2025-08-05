@@ -34,12 +34,12 @@ void printElementList(ELEMENT_LIST elementList) {
     }
 }
 
-void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
+void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
     unsigned char flags;
     EXPRESSION_ELEMENT element;
-    for (int i = 0; i < rpnSize; i++)
+    for (int i = 0; i < stackSize; i++)
     {
-        element = rpnStack[i];
+        element = stack[i];
         flags = element.flags;
 
         if (flags & 1 << 7) printf("%f ", element.content.number_double);
@@ -49,13 +49,14 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
 }
 
 char countSizeAfterAddSpecialChars(char[]);
-int hasSyntaxError(char *);
+int hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-double stackSolver(EXPRESSION_ELEMENT rpnStack[]) {
-    
+double stackSolver(EXPRESSION_ELEMENT rpnStack[], EXPRESSION_ELEMENT *result) {
+    printf("#\n");
+    printExpElementArray(result, 1);
 }
 
 int main() {
@@ -68,13 +69,18 @@ int main() {
     char g[] = "-3.5*15+(-2.5+.4)"; // ok
     char h[] = "-3.5*15+(-2.5*.4)"; // ok
     char i[] = "-3.5-15+(-2.5*.4)"; // ok
+    char j[] = "5+((1+2)*4)-3"; // ok
     
     ARRAY inputWithZeros;
 
-    char* testeAtual = f;
+    char* testeAtual = j;
+
+    EXPRESSION_ELEMENT result;
+    result.flags = 0b10000000;
+    result.content.number_double = 15.6;
 
     // SYNTAX ERROR
-    printf("\n> %s", testeAtual);
+    printf("\n%s", testeAtual);
     if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); return 1; }
 
     // ADD ZEROS
@@ -90,7 +96,11 @@ int main() {
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
     printExpElementArray(rpnStack, structuredExp.RPNExpSize);
-    
+
+    // STACK SOLVER
+    printf("\n");
+    stackSolver(rpnStack, &result);
+
     printf("\n\n");
 
     return 0;

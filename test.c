@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <float.h>
 
+#define  INT_INT     ((numStack[topStack-1].flags & 1 << 7) == 0x00) && ((numStack[topStack].flags & 1 << 7) == 0x00)
 #define  INT_FLOAT   ((numStack[topStack-1].flags & 1 << 7) == 0x00) && ((numStack[topStack].flags & 1 << 7) == 0x80)
 #define  FLOAT_INT   ((numStack[topStack-1].flags & 1 << 7) == 0x80) && ((numStack[topStack].flags & 1 << 7) == 0x00)
 #define  FLOAT_FLOAT ((numStack[topStack-1].flags & 1 << 7) == 0x80) && ((numStack[topStack].flags & 1 << 7) == 0x80)
@@ -40,6 +41,7 @@ void printElementList(ELEMENT_LIST elementList) {
         else printf("%c ", element.content.symbol_char);
     }
 }
+
 void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
     unsigned char flags;
     EXPRESSION_ELEMENT element;
@@ -53,6 +55,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* rpnStack, int rpnSize) {
         else printf("%c ", element.content.symbol_char);
     }
 }
+
 void printExpElement(EXPRESSION_ELEMENT element) {
     unsigned char flags;
     flags = element.flags;
@@ -71,12 +74,14 @@ EXPRESSION_ELEMENT sum(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
     r.content.number_int = a.content.number_int + b.content.number_int;
     return r;
 }
+
 EXPRESSION_ELEMENT subtraction(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
     EXPRESSION_ELEMENT r;
     r.flags = 0;
     r.content.number_int = a.content.number_int - b.content.number_int;
     return r;
 }
+
 EXPRESSION_ELEMENT multiplication(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b) {
     EXPRESSION_ELEMENT r;
     r.flags = 0;

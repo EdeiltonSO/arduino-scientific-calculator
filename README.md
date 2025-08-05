@@ -77,7 +77,7 @@ shift (pra inversa das funções abaixo)
 
 ## Notas
 
-### Bits 7:0
+### Bits 7:0 (flags dos EXPRESSION_ELEMENT)
 Bit  | Finalidade
 ---: | ------------------------
 7    | número decimal
@@ -85,7 +85,7 @@ Bit  | Finalidade
 5:3  | (não utilizados)
 2:0  | prioridade de símbolo
 
-### Bits 2:0
+### Bits 2:0 (prioridade de símbolo)
 Símbolo  | Flag | Prioridade
 -------: | :--: | ------------
 \+ -     | 001  | 1
