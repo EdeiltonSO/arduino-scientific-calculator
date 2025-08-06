@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define IS_CHAR(flags)  !(flags & 1 << 7) && flags | 0
+#define IS_INT(flags)   !(flags | 0)
+#define IS_FLOAT(flags) flags & 1 << 7
+
 typedef struct {
     unsigned char flags;
     union {
@@ -42,8 +46,8 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
         element = stack[i];
         flags = element.flags;
 
-        if (flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%i ", element.content.number_int);
+        if (IS_FLOAT(flags)) printf("%f ", element.content.number_double);
+        else if (IS_INT(flags)) printf("%i ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
 }
@@ -54,9 +58,21 @@ void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-double stackSolver(EXPRESSION_ELEMENT rpnStack[], EXPRESSION_ELEMENT *result) {
-    printf("#\n");
+double stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEMENT *result) {
+    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) return 1;
+    
+    printExpElementArray(rpnStack, stackSize);
+    printf("\n");
     printExpElementArray(result, 1);
+    printf("stackSize: %i\n", stackSize);
+    for (int i = 0; i < stackSize; i++)
+    {
+        if (IS_CHAR(rpnStack[i].flags))
+        {
+            printf("%c ", rpnStack[i].content.symbol_char);
+        }
+        
+    }
 }
 
 int main() {
@@ -70,19 +86,20 @@ int main() {
     char h[] = "-3.5*15+(-2.5*.4)"; // ok
     char i[] = "-3.5-15+(-2.5*.4)"; // ok
     char j[] = "5+((1+2)*4)-3"; // ok
+
+    char k[] = "+"; // ok (syntax error)
     
     ARRAY inputWithZeros;
 
     char* testeAtual = j;
 
     EXPRESSION_ELEMENT result;
-    result.flags = 0b10000000;
-    result.content.number_double = 15.6;
+    result.flags = 0b00000000;
 
     // SYNTAX ERROR
     printf("\n%s", testeAtual);
     if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); return 1; }
-
+    
     // ADD ZEROS
     addCharsToSpecialCases(testeAtual, &inputWithZeros);
 
@@ -99,7 +116,7 @@ int main() {
 
     // STACK SOLVER
     printf("\n");
-    stackSolver(rpnStack, &result);
+    stackSolver(rpnStack, structuredExp.RPNExpSize, &result);
 
     printf("\n\n");
 
@@ -116,6 +133,8 @@ int hasSyntaxError(char exp[]) {
     if (exp[0] == '*' || exp[0] == '/' || 
         exp[0] == '^' || exp[0] == ')' || 
         exp[0] == '\0') return 1;
+
+    if ((exp[0] == '+' || exp[0] == '-') && exp[pos] == '\0') return 1;
 
     if (exp[0] == '(') openedBrackets++;
 
