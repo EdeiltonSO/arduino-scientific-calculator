@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define IS_CHAR(flags)  !(flags & 1 << 7) && flags | 0
 #define IS_INT(flags)   !(flags | 0)
 #define IS_FLOAT(flags) flags & 1 << 7
+#define IS_CHAR(flags)  !(flags & 1 << 7) && flags | 0
 
 typedef struct {
     unsigned char flags;
@@ -32,8 +32,8 @@ void printElementList(ELEMENT_LIST elementList) {
         EXPRESSION_ELEMENT element = elementList.list[i];
         unsigned char flags = element.flags;
 
-        if(flags & 1 << 7) printf("%f ", element.content.number_double);
-        else if (!(flags | 0)) printf("%d ", element.content.number_int);
+        if(IS_FLOAT(flags)) printf("%f ", element.content.number_double);
+        else if (IS_INT(flags)) printf("%d ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
 }
@@ -324,7 +324,7 @@ ELEMENT_LIST transformCharToStruct(char exp[]) {
                     i++;
                 }
 
-                if(number.flags & 1 << 7)
+                if(IS_FLOAT(number.flags))
                     number.content.number_double = atof(currentNumber);
                 else
                     number.content.number_int = atoll(currentNumber);
