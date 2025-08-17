@@ -130,11 +130,13 @@ int hasSyntaxError(char exp[]) {
     char openedBrackets = 0;
     char dotsOfCurrentNumber = 0;
 
-    if (exp[0] == '*' || exp[0] == '/' || 
-        exp[0] == '^' || exp[0] == ')' || 
-        exp[0] == '\0') return 1;
-
-    if ((exp[0] == '+' || exp[0] == '-') && exp[pos] == '\0') return 1;
+    if (exp[0] == '*' ||
+        exp[0] == '/' || 
+        exp[0] == '^' ||
+        exp[0] == ')' || 
+        exp[0] == '\0' ||
+        ((exp[0] == '+' || exp[0] == '-') && exp[pos] == '\0')
+    ) return 1;
 
     if (exp[0] == '(') openedBrackets++;
 
