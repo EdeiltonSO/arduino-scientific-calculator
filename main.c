@@ -53,12 +53,14 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
 }
 
 char countSizeAfterAddSpecialChars(char[]);
+EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
+
 int hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
-double stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEMENT *result) {
+int stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEMENT *result) {
     if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) return 1;
     
     printExpElementArray(rpnStack, stackSize);
@@ -69,9 +71,40 @@ double stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEM
     {
         if (IS_CHAR(rpnStack[i].flags))
         {
-            printf("%c ", rpnStack[i].content.symbol_char);
+            EXPRESSION_ELEMENT firstElement = rpnStack[i-2];
+            EXPRESSION_ELEMENT secondElement = rpnStack[i-1];
+
+            EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
+            rpnStack[i] = intermediateResult;
+
+            for (int j = i; j < stackSize; j++)
+            {
+                rpnStack[j-2] = rpnStack[j];
+            }
+
+            stackSize -= 2;
+            i = 0;
+
+            if (stackSize == 1)
+            {
+                *result = intermediateResult;
+                return 0;
+            }
         }
         
+        // se for float ou int e stackSize == 1, armazena valor em result e encerra a função
+        // retornar void ou uma flag de sucesso (return 0 talvez)
+        // else if (IS_FLOAT(rpnStack[i].flags))
+        // {
+        //     printf("%f ", rpnStack[i].content.number_double);
+        // }
+        // else if (IS_INT(rpnStack[i].flags))
+        // {
+        //     printf("%i ", rpnStack[i].content.number_int);
+        // }
+        // else {
+        //     printf("? ");
+        // }
     }
 }
 
@@ -123,8 +156,7 @@ int main() {
     return 0;
 }
 
-// FUNÇÕES PRONTAS
-
+// FUNÇÕES PRINCIPAIS
 int hasSyntaxError(char exp[]) {
     char pos = 1;
     char openedBrackets = 0;
@@ -426,6 +458,7 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
     output[outputSize-1].flags |= 0b01000000;
 }
 
+// FUNÇÕES AUXILIARES
 char countSizeAfterAddSpecialChars(char input[]) {
     char inputCount = 0;
     char shift = 0;
@@ -465,4 +498,8 @@ char countSizeAfterAddSpecialChars(char input[]) {
     }
 
     return inputCount+shift;
+}
+
+EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
+    // implementar
 }

@@ -81,8 +81,8 @@ shift (pra inversa das funções abaixo)
 Bit  | Finalidade
 ---: | ------------------------
 7    | número decimal
-6    | último elemento da pilha RPN
-5:3  | (não utilizados)
+6    | último elemento da pilha RPN (revisar necessidade)
+5:3  | (reservado para uso futuro)
 2:0  | prioridade de símbolo
 
 ### Bits 2:0 (prioridade de símbolo)
