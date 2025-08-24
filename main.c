@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define IS_INT(flags)   !(flags | 0)
 #define IS_FLOAT(flags) flags & 1 << 7
@@ -61,21 +62,28 @@ ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 
 int stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEMENT *result) {
-    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) return 1;
+    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) exit(1);
     
     printExpElementArray(rpnStack, stackSize);
     printf("\n");
-    printExpElementArray(result, 1);
-    printf("stackSize: %i\n", stackSize);
+
+    printf("stackSize: %i\n\n", stackSize);
     for (int i = 0; i < stackSize; i++)
     {
         if (IS_CHAR(rpnStack[i].flags))
         {
             EXPRESSION_ELEMENT firstElement = rpnStack[i-2];
             EXPRESSION_ELEMENT secondElement = rpnStack[i-1];
-
+            printExpElementArray(&firstElement, 1);
+            printExpElementArray(&rpnStack[i], 1);
+            printExpElementArray(&secondElement, 1);
+            
             EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
             rpnStack[i] = intermediateResult;
+            printf("= ");
+            printExpElementArray(&intermediateResult, 1);
+
+            printf("\n---------------------------\n");
 
             for (int j = i; j < stackSize; j++)
             {
@@ -91,20 +99,6 @@ int stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEMENT
                 return 0;
             }
         }
-        
-        // se for float ou int e stackSize == 1, armazena valor em result e encerra a função
-        // retornar void ou uma flag de sucesso (return 0 talvez)
-        // else if (IS_FLOAT(rpnStack[i].flags))
-        // {
-        //     printf("%f ", rpnStack[i].content.number_double);
-        // }
-        // else if (IS_INT(rpnStack[i].flags))
-        // {
-        //     printf("%i ", rpnStack[i].content.number_int);
-        // }
-        // else {
-        //     printf("? ");
-        // }
     }
 }
 
@@ -121,17 +115,18 @@ int main() {
     char j[] = "5+((1+2)*4)-3"; // ok
 
     char k[] = "+"; // ok (syntax error)
+    char l[] = "1/0"; // ?
     
     ARRAY inputWithZeros;
 
-    char* testeAtual = j;
+    char* testeAtual = b;
 
     EXPRESSION_ELEMENT result;
     result.flags = 0b00000000;
 
     // SYNTAX ERROR
     printf("\n%s", testeAtual);
-    if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); return 1; }
+    if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); exit(1); }
     
     // ADD ZEROS
     addCharsToSpecialCases(testeAtual, &inputWithZeros);
@@ -151,6 +146,8 @@ int main() {
     printf("\n");
     stackSolver(rpnStack, structuredExp.RPNExpSize, &result);
 
+    printf("\n");
+    printExpElementArray(&result, 1);
     printf("\n\n");
 
     return 0;
@@ -459,6 +456,12 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
 }
 
 // FUNÇÕES AUXILIARES
+void divZeroError() {
+    // tratar divisão por zero
+    printf("divisao por 0");
+    exit(1);
+}
+
 char countSizeAfterAddSpecialChars(char input[]) {
     char inputCount = 0;
     char shift = 0;
@@ -501,5 +504,116 @@ char countSizeAfterAddSpecialChars(char input[]) {
 }
 
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
-    // implementar
+    EXPRESSION_ELEMENT operateTwoElementsResult;
+
+    operateTwoElementsResult.flags = 0b10000000;
+    
+    if (IS_INT(firstElement.flags) && IS_INT(secondElement.flags)) {
+        operateTwoElementsResult.flags = 0b00000000;
+
+        switch (operator.content.symbol_char) {
+        case '+':
+            operateTwoElementsResult.content.number_int = firstElement.content.number_int + secondElement.content.number_int;
+            break;
+        case '-':
+            operateTwoElementsResult.content.number_int = firstElement.content.number_int - secondElement.content.number_int;
+            break;
+        case '*':
+            operateTwoElementsResult.content.number_int = firstElement.content.number_int * secondElement.content.number_int;
+            break;
+        case '/':
+            if (secondElement.content.number_int == 0)
+                divZeroError();
+            else{
+                if (firstElement.content.number_int % secondElement.content.number_int == 0) {
+                    operateTwoElementsResult.content.number_int = firstElement.content.number_int / secondElement.content.number_int;
+                }
+                else {
+                    operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_int;
+                    operateTwoElementsResult.flags = 0b10000000;
+                }
+            }
+            break;
+        case '^':
+            operateTwoElementsResult.content.number_double = pow(firstElement.content.number_int, secondElement.content.number_int);
+            operateTwoElementsResult.flags = 0b10000000;
+            break;
+        default:
+            break;
+        }
+    }
+
+    else if (IS_INT(firstElement.flags) && IS_FLOAT(secondElement.flags)) {
+        switch (operator.content.symbol_char) {
+        case '+':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_int + secondElement.content.number_double;
+            break;
+        case '-':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_int - secondElement.content.number_double;
+            break;
+        case '*':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_int * secondElement.content.number_double;
+            break;
+        case '/':
+            if (secondElement.content.number_double == 0.0)
+                divZeroError();
+            operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_double;
+            break;
+        case '^':
+            operateTwoElementsResult.content.number_double = powl(firstElement.content.number_int, secondElement.content.number_double);
+            break;
+        default:
+            break;
+        }
+    }
+
+    else if (IS_FLOAT(firstElement.flags) && IS_INT(secondElement.flags)) {
+        switch (operator.content.symbol_char) {
+        case '+':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_int;
+            break;
+        case '-':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_int;
+            break;
+        case '*':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_int;
+            break;
+        case '/':
+            if (secondElement.content.number_int == 0)
+                divZeroError();
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_int;
+            break;
+        case '^':
+            operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_int);
+            break;
+        default:
+            break;
+        }
+    }
+
+    else { // IS_FLOAT(firstElement.flags) && IS_FLOAT(secondElement.flags)
+        switch (operator.content.symbol_char) {
+        case '+':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_double;
+            break;
+        case '-':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_double;
+            break;
+        case '*':
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_double;
+            break;
+        case '/':
+            if (secondElement.content.number_double == 0.0)
+                divZeroError();
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_double;
+            break;
+        case '^':
+            operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_double);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return operateTwoElementsResult;
 }
