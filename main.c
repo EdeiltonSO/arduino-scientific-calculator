@@ -60,47 +60,7 @@ int hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
-
-int stackSolver(EXPRESSION_ELEMENT rpnStack[], int stackSize, EXPRESSION_ELEMENT *result) {
-    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) exit(1);
-    
-    printExpElementArray(rpnStack, stackSize);
-    printf("\n");
-
-    printf("stackSize: %i\n\n", stackSize);
-    for (int i = 0; i < stackSize; i++)
-    {
-        if (IS_CHAR(rpnStack[i].flags))
-        {
-            EXPRESSION_ELEMENT firstElement = rpnStack[i-2];
-            EXPRESSION_ELEMENT secondElement = rpnStack[i-1];
-            printExpElementArray(&firstElement, 1);
-            printExpElementArray(&rpnStack[i], 1);
-            printExpElementArray(&secondElement, 1);
-            
-            EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
-            rpnStack[i] = intermediateResult;
-            printf("= ");
-            printExpElementArray(&intermediateResult, 1);
-
-            printf("\n---------------------------\n");
-
-            for (int j = i; j < stackSize; j++)
-            {
-                rpnStack[j-2] = rpnStack[j];
-            }
-
-            stackSize -= 2;
-            i = 0;
-
-            if (stackSize == 1)
-            {
-                *result = intermediateResult;
-                return 0;
-            }
-        }
-    }
-}
+int stackSolver(EXPRESSION_ELEMENT *, int, EXPRESSION_ELEMENT *);
 
 int main() {
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
@@ -115,11 +75,13 @@ int main() {
     char j[] = "5+((1+2)*4)-3"; // ok
 
     char k[] = "+"; // ok (syntax error)
-    char l[] = "1/0"; // ?
+    char l[] = "1/0"; // ok (divisao por 0)
+    char m[] = "7.7777777777+1.1111111111"; // ok
+    char n[] = "2147483647+1"; // tratar overflow ######################################
     
     ARRAY inputWithZeros;
 
-    char* testeAtual = b;
+    char* testeAtual = n;
 
     EXPRESSION_ELEMENT result;
     result.flags = 0b00000000;
@@ -453,6 +415,47 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
         output[outputSize++] = symbolStack[--symbolStackSize];
 
     output[outputSize-1].flags |= 0b01000000;
+}
+
+int stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT *result) {
+    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) exit(1);
+    
+    printExpElementArray(rpnStack, stackSize);
+    printf("\n");
+
+    printf("stackSize: %i\n\n", stackSize);
+    for (int i = 0; i < stackSize; i++)
+    {
+        if (IS_CHAR(rpnStack[i].flags))
+        {
+            EXPRESSION_ELEMENT firstElement = rpnStack[i-2];
+            EXPRESSION_ELEMENT secondElement = rpnStack[i-1];
+            printExpElementArray(&firstElement, 1);
+            printExpElementArray(&rpnStack[i], 1);
+            printExpElementArray(&secondElement, 1);
+            
+            EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
+            rpnStack[i] = intermediateResult;
+            printf("= ");
+            printExpElementArray(&intermediateResult, 1);
+
+            printf("\n---------------------------\n");
+
+            for (int j = i; j < stackSize; j++)
+            {
+                rpnStack[j-2] = rpnStack[j];
+            }
+
+            stackSize -= 2;
+            i = 0;
+
+            if (stackSize == 1)
+            {
+                *result = intermediateResult;
+                return 0;
+            }
+        }
+    }
 }
 
 // FUNÇÕES AUXILIARES
