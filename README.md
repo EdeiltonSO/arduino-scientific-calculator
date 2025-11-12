@@ -15,7 +15,7 @@
 - [x] explodir a string
 - [x] converter em vetor de structs (avaliar uso de atoi e atof)
 - [x] jogar structs numa pilha RPN
-- [ ] resolver a pilha em RPN
+- [x] resolver a pilha em RPN
 - [ ] formatar dado de saída
 
 ## HARDWARE
