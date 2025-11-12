@@ -506,6 +506,67 @@ char countSizeAfterAddSpecialChars(char input[]) {
     return inputCount+shift;
 }
 
+void isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
+    char isAnOverflow = 0;
+
+    if (IS_INT(a.flags) && IS_INT(b.flags)) {
+        if (
+            (op == '+' || op == '-')
+            && ((b.content.number_int > 0 && a.content.number_int > LLONG_MAX - b.content.number_int)
+            || (b.content.number_int < 0 && a.content.number_int < LLONG_MIN - b.content.number_int))
+        ) { isAnOverflow = 1; }
+
+        // -----------------------------------------------
+
+        else if (
+            (op == '*')
+            // ?
+        ) { isAnOverflow = 1; }
+
+        // -----------------------------------------------
+
+        else if (
+            (op == '^')
+            // ?
+        ) { isAnOverflow = 1; }
+
+        // -----------------------------------------------
+    }
+    else if (IS_INT(a.flags) && IS_FLOAT(b.flags)) {
+
+    }
+    else if (IS_FLOAT(a.flags) && IS_INT(b.flags)) {
+        
+    }
+    else { // IS_FLOAT(a.flags) && IS_FLOAT(b.flags)
+
+    }
+
+    isAnOverflow ? exit(1) : (void)0;
+    
+    /*
+        int int +
+        int int -
+        int int *
+        int int ^
+
+        int float +
+        int float -
+        int float *
+        int float ^
+
+        float int +
+        float int -
+        float int *
+        float int ^
+
+        float float +
+        float float -
+        float float *
+        float float ^
+    */
+}
+
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
     EXPRESSION_ELEMENT operateTwoElementsResult;
 
@@ -516,6 +577,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
 
         switch (operator.content.symbol_char) {
         case '+':
+            isItAnOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_int = firstElement.content.number_int + secondElement.content.number_int;
             break;
         case '-':
