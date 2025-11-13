@@ -506,7 +506,7 @@ char countSizeAfterAddSpecialChars(char input[]) {
     return inputCount+shift;
 }
 
-void isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
+char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
     char isAnOverflow = 0;
 
     if (IS_INT(a.flags) && IS_INT(b.flags)) {
@@ -516,55 +516,89 @@ void isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             || (b.content.number_int < 0 && a.content.number_int < LLONG_MIN - b.content.number_int))
         ) { isAnOverflow = 1; }
 
-        // -----------------------------------------------
-
         else if (
-            (op == '*')
-            // ?
+            (op == '*' && b.content.number_int != 0)
+            && ((b.content.number_int > 0 && (a.content.number_int > LLONG_MAX / b.content.number_int || a.content.number_int < LLONG_MIN / b.content.number_int))
+            || (b.content.number_int < 0 && (a.content.number_int < LLONG_MAX / b.content.number_int || a.content.number_int > LLONG_MIN / b.content.number_int)))
         ) { isAnOverflow = 1; }
 
-        // -----------------------------------------------
+        else if (op == '^') {
+            double base = (double)a.content.number_int;
+            double exp  = (double)b.content.number_int;
+            double result = pow(base, exp);
 
-        else if (
-            (op == '^')
-            // ?
-        ) { isAnOverflow = 1; }
-
-        // -----------------------------------------------
+            if (!isfinite(result) || result > (double)LLONG_MAX || result < (double)LLONG_MIN)
+                isAnOverflow = 1;
+        }
     }
     else if (IS_INT(a.flags) && IS_FLOAT(b.flags)) {
+        if (
+            (op == '+' || op == '-')
+            && ((b.content.number_double > 0 && a.content.number_int > LLONG_MAX - b.content.number_double)
+            || (b.content.number_double < 0 && a.content.number_int < LLONG_MIN - b.content.number_double))
+        ) { isAnOverflow = 1; }
 
+        else if (
+            (op == '*' && b.content.number_double != 0)
+            && ((b.content.number_double > 0 && (a.content.number_int > LLONG_MAX / b.content.number_double || a.content.number_int < LLONG_MIN / b.content.number_double))
+            || (b.content.number_double < 0 && (a.content.number_int < LLONG_MAX / b.content.number_double || a.content.number_int > LLONG_MIN / b.content.number_double)))
+        ) { isAnOverflow = 1; }
+
+        else if (op == '^') {
+            double base = (double)a.content.number_int;
+            double exp  = b.content.number_double;
+            double result = pow(base, exp);
+
+            if (!isfinite(result) || result > (double)LLONG_MAX || result < (double)LLONG_MIN)
+                isAnOverflow = 1;
+        }
     }
     else if (IS_FLOAT(a.flags) && IS_INT(b.flags)) {
-        
+        if (
+            (op == '+' || op == '-')
+            && ((b.content.number_int > 0 && a.content.number_double > LLONG_MAX - b.content.number_int)
+            || (b.content.number_int < 0 && a.content.number_double < LLONG_MIN - b.content.number_int))
+        ) { isAnOverflow = 1; }
+
+        else if (
+            (op == '*' && b.content.number_int != 0)
+            && ((b.content.number_int > 0 && (a.content.number_double > LLONG_MAX / b.content.number_int || a.content.number_double < LLONG_MIN / b.content.number_int))
+            || (b.content.number_int < 0 && (a.content.number_double < LLONG_MAX / b.content.number_int || a.content.number_double > LLONG_MIN / b.content.number_int)))
+        ) { isAnOverflow = 1; }
+
+        else if (op == '^') {
+            double base = (double)a.content.number_double;
+            double exp  = (double)b.content.number_int;
+            double result = pow(base, exp);
+
+            if (!isfinite(result) || result > (double)LLONG_MAX || result < (double)LLONG_MIN)
+                isAnOverflow = 1;
+        }
     }
     else { // IS_FLOAT(a.flags) && IS_FLOAT(b.flags)
+        if (
+            (op == '+' || op == '-')
+            && ((b.content.number_double > 0 && a.content.number_double > LLONG_MAX - b.content.number_double)
+            || (b.content.number_double < 0 && a.content.number_double < LLONG_MIN - b.content.number_double))
+        ) { isAnOverflow = 1; }
 
+        else if (
+            (op == '*' && b.content.number_double != 0)
+            && ((b.content.number_double > 0 && (a.content.number_double > LLONG_MAX / b.content.number_double || a.content.number_double < LLONG_MIN / b.content.number_double))
+            || (b.content.number_double < 0 && (a.content.number_double < LLONG_MAX / b.content.number_double || a.content.number_double > LLONG_MIN / b.content.number_double)))
+        ) { isAnOverflow = 1; }
+
+        else if (op == '^') {
+            double base = (double)a.content.number_double;
+            double exp  = (double)b.content.number_double;
+            double result = pow(base, exp);
+
+            if (!isfinite(result) || result > (double)LLONG_MAX || result < (double)LLONG_MIN)
+                isAnOverflow = 1;
+        }
     }
 
-    isAnOverflow ? exit(1) : (void)0;
-    
-    /*
-        int int +
-        int int -
-        int int *
-        int int ^
-
-        int float +
-        int float -
-        int float *
-        int float ^
-
-        float int +
-        float int -
-        float int *
-        float int ^
-
-        float float +
-        float float -
-        float float *
-        float float ^
-    */
+    return isAnOverflow;
 }
 
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
