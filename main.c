@@ -55,6 +55,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
 
 char countSizeAfterAddSpecialChars(char[]);
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
+char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
 
 int hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
@@ -63,6 +64,21 @@ void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 int stackSolver(EXPRESSION_ELEMENT *, int, EXPRESSION_ELEMENT *);
 
 int main() {
+
+    // OVERFLOW TEST
+    EXPRESSION_ELEMENT x;
+    x.flags = 0b00000000;
+    x.content.number_int = LLONG_MAX;
+
+    EXPRESSION_ELEMENT y;
+    y.flags = 0b00000000;
+    y.content.number_int = -1;
+
+    printf("\n%i\n", isItAnOverflow(x, y, '-'));
+
+    return 0;
+    // -------------
+
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
     char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok 
     char c[] = "1+1"; // ok
@@ -511,10 +527,16 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
 
     if (IS_INT(a.flags) && IS_INT(b.flags)) {
         if (
-            (op == '+' || op == '-')
+            (op == '+')
             && ((b.content.number_int > 0 && a.content.number_int > LLONG_MAX - b.content.number_int)
-            || (b.content.number_int < 0 && a.content.number_int < LLONG_MIN - b.content.number_int))
-        ) { isAnOverflow = 1; }
+            || (b.content.number_int < 0 && a.content.number_int < LLONG_MIN + llabs(b.content.number_int)))
+        ) { printf("MAIS"); isAnOverflow = 1; }
+
+        else if (
+            (op == '-')
+            && ((b.content.number_int > 0 && a.content.number_int < LLONG_MIN + b.content.number_int)
+            || (b.content.number_int < 0 && a.content.number_int > LLONG_MAX - b.content.number_int))
+        ) { printf("MENOS"); isAnOverflow = 1; }
 
         else if (
             (op == '*' && b.content.number_int != 0)
