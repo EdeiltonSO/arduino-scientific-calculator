@@ -53,9 +53,10 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
     }
 }
 
+char* calculate(char input[]);
 char countSizeAfterAddSpecialChars(char[]);
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
-char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
+void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
 
 int hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
@@ -64,23 +65,7 @@ void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 int stackSolver(EXPRESSION_ELEMENT *, int, EXPRESSION_ELEMENT *);
 
 int main() {
-
-    // OVERFLOW TEST
-    EXPRESSION_ELEMENT x;
-    x.flags = 0b00000000;
-    x.content.number_int = -LONG_LONG_MAX/LONG_LONG_MAX;
-
-    EXPRESSION_ELEMENT y;
-    y.flags = 0b10000000;
-    y.content.number_double = 2.0;
-
-    printf("\n%i\n", isItAnOverflow(x, y, '^'));
-
-    return 0;
-
-    // -------------
-
-    char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
+    char a[] = "0.5+35.9+42^5/((74-(5^2+9)*2.1))-20"; // ok
     char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok 
     char c[] = "1+1"; // ok
     char d[] = "-1*3*(4-2)/5*(-1)"; // ok
@@ -94,40 +79,11 @@ int main() {
     char k[] = "+"; // ok (syntax error)
     char l[] = "1/0"; // ok (divisao por 0)
     char m[] = "7.7777777777+1.1111111111"; // ok
-    char n[] = "2147483647+1"; // tratar overflow ######################################
+    char n[] = "2147483647+1"; // ok
     
-    ARRAY inputWithZeros;
+    char* testeAtual = a;
 
-    char* testeAtual = n;
-
-    EXPRESSION_ELEMENT result;
-    result.flags = 0b00000000;
-
-    // SYNTAX ERROR
-    printf("\n%s", testeAtual);
-    if (hasSyntaxError(testeAtual)) { printf("\nsyntax error\n\n"); exit(1); }
-    
-    // ADD ZEROS
-    addCharsToSpecialCases(testeAtual, &inputWithZeros);
-
-    // TRANSFORM TO STRUCT
-    printf("\n");
-    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
-    printElementList(structuredExp);
-
-    // CREATE RPN STACK
-    printf("\n");
-    EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
-    createRPNStack(structuredExp, rpnStack);
-    printExpElementArray(rpnStack, structuredExp.RPNExpSize);
-
-    // STACK SOLVER
-    printf("\n");
-    stackSolver(rpnStack, structuredExp.RPNExpSize, &result);
-
-    printf("\n");
-    printExpElementArray(&result, 1);
-    printf("\n\n");
+    calculate(testeAtual);
 
     return 0;
 }
@@ -476,9 +432,43 @@ int stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT 
 }
 
 // FUNÇÕES AUXILIARES
+char* calculate(char input[]) {
+    ARRAY inputWithZeros;
+
+    EXPRESSION_ELEMENT result;
+    result.flags = 0b00000000;
+
+    char* output;
+
+    // SYNTAX ERROR
+    printf("\n%s", input);
+    if (hasSyntaxError(input)) { printf("\nsyntax error\n\n"); exit(1); }
+    
+    // ADD ZEROS
+    addCharsToSpecialCases(input, &inputWithZeros);
+
+    // TRANSFORM TO STRUCT
+    printf("\n");
+    ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
+    printElementList(structuredExp);
+
+    // CREATE RPN STACK
+    printf("\n");
+    EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
+    createRPNStack(structuredExp, rpnStack);
+    printExpElementArray(rpnStack, structuredExp.RPNExpSize);
+
+    // STACK SOLVER
+    printf("\n");
+    stackSolver(rpnStack, structuredExp.RPNExpSize, &result);
+
+    printf("\n");
+    printExpElementArray(&result, 1);
+    printf("\n\n");
+}
+
 void divZeroError() {
-    // tratar divisão por zero
-    printf("divisao por 0");
+    printf("div/0");
     exit(1);
 }
 
@@ -523,7 +513,7 @@ char countSizeAfterAddSpecialChars(char input[]) {
     return inputCount+shift;
 }
 
-char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
+void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
     char isAnOverflow = 0;
 
     if (IS_INT(a.flags) && IS_INT(b.flags)) {
@@ -531,33 +521,31 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             (op == '+')
             && ((b.content.number_int > 0 && a.content.number_int > LLONG_MAX - b.content.number_int)
             || (b.content.number_int < 0 && a.content.number_int < LLONG_MIN + llabs(b.content.number_int)))
-        ) { printf("MAIS"); isAnOverflow = 1; }
+        ) { isAnOverflow = 1; }
 
         else if (
             (op == '-')
             && ((b.content.number_int > 0 && a.content.number_int < LLONG_MIN + b.content.number_int)
             || (b.content.number_int < 0 && a.content.number_int > LLONG_MAX - b.content.number_int))
-        ) { printf("MENOS"); isAnOverflow = 1; }
+        ) { isAnOverflow = 1; }
 
         else if (
             (op == '*' && b.content.number_int != 0)
             && ((b.content.number_int > 0 && (a.content.number_int > LLONG_MAX / b.content.number_int || a.content.number_int < LLONG_MIN / b.content.number_int))
             || (b.content.number_int < 0 && (a.content.number_int < LLONG_MAX / b.content.number_int || a.content.number_int > LLONG_MIN / b.content.number_int)))
-        ) { printf("MULTI"); isAnOverflow = 1; }
+        ) { isAnOverflow = 1; }
 
         else if (op == '^') {
 
             long long result = 1;
 
             if (b.content.number_int < 0) {
-                printf("overflow");
                 isAnOverflow = 1;
             }
             else {
                 for (long long i = 0; i < b.content.number_int; i++) {
 
                     if (a.content.number_int != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_int)) {
-                        printf("overflow");
                         isAnOverflow = 1;
                         break;
                     }
@@ -585,14 +573,12 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             long long result = 1;
 
             if (b.content.number_double < 0) {
-                printf("overflow");
                 isAnOverflow = 1;
             }
             else {
                 for (long long i = 0; i < b.content.number_double; i++) {
 
                     if (a.content.number_int != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_int)) {
-                        printf("overflow");
                         isAnOverflow = 1;
                         break;
                     }
@@ -620,14 +606,12 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             long long result = 1;
 
             if (b.content.number_int < 0) {
-                printf("overflow");
                 isAnOverflow = 1;
             }
             else {
                 for (long long i = 0; i < b.content.number_int; i++) {
 
                     if (a.content.number_double != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_double)) {
-                        printf("overflow");
                         isAnOverflow = 1;
                         break;
                     }
@@ -655,14 +639,12 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             long long result = 1;
 
             if (b.content.number_double < 0) {
-                printf("overflow");
                 isAnOverflow = 1;
             }
             else {
                 for (long long i = 0; i < b.content.number_double; i++) {
 
                     if (a.content.number_double != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_double)) {
-                        printf("overflow");
                         isAnOverflow = 1;
                         break;
                     }
@@ -673,7 +655,7 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
         }
     }
 
-    return isAnOverflow;
+    if (isAnOverflow) { printf("overflow"); exit(1); }
 }
 
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
@@ -686,13 +668,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
 
         switch (operator.content.symbol_char) {
         case '+':
-            isItAnOverflow(firstElement, secondElement, operator.content.symbol_char);
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_int = firstElement.content.number_int + secondElement.content.number_int;
             break;
         case '-':
             operateTwoElementsResult.content.number_int = firstElement.content.number_int - secondElement.content.number_int;
             break;
         case '*':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_int = firstElement.content.number_int * secondElement.content.number_int;
             break;
         case '/':
@@ -709,8 +692,8 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             }
             break;
         case '^':
-            operateTwoElementsResult.content.number_double = pow(firstElement.content.number_int, secondElement.content.number_int);
-            operateTwoElementsResult.flags = 0b10000000;
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            operateTwoElementsResult.content.number_int = powl(firstElement.content.number_int, secondElement.content.number_int);
             break;
         default:
             break;
@@ -720,12 +703,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else if (IS_INT(firstElement.flags) && IS_FLOAT(secondElement.flags)) {
         switch (operator.content.symbol_char) {
         case '+':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_int + secondElement.content.number_double;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_int - secondElement.content.number_double;
             break;
         case '*':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_int * secondElement.content.number_double;
             break;
         case '/':
@@ -734,6 +719,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_double;
             break;
         case '^':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_int, secondElement.content.number_double);
             break;
         default:
@@ -744,12 +730,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else if (IS_FLOAT(firstElement.flags) && IS_INT(secondElement.flags)) {
         switch (operator.content.symbol_char) {
         case '+':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_int;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_int;
             break;
         case '*':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_int;
             break;
         case '/':
@@ -758,6 +746,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_int;
             break;
         case '^':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_int);
             break;
         default:
@@ -768,12 +757,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else { // IS_FLOAT(firstElement.flags) && IS_FLOAT(secondElement.flags)
         switch (operator.content.symbol_char) {
         case '+':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_double;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_double;
             break;
         case '*':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_double;
             break;
         case '/':
@@ -782,6 +773,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_double;
             break;
         case '^':
+            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_double);
             break;
         default:
