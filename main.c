@@ -68,15 +68,16 @@ int main() {
     // OVERFLOW TEST
     EXPRESSION_ELEMENT x;
     x.flags = 0b00000000;
-    x.content.number_int = LLONG_MAX;
+    x.content.number_int = -LONG_LONG_MAX/LONG_LONG_MAX;
 
     EXPRESSION_ELEMENT y;
-    y.flags = 0b00000000;
-    y.content.number_int = -1;
+    y.flags = 0b10000000;
+    y.content.number_double = 2.0;
 
-    printf("\n%i\n", isItAnOverflow(x, y, '-'));
+    printf("\n%i\n", isItAnOverflow(x, y, '^'));
 
     return 0;
+
     // -------------
 
     char a[] = "0.5+35.9+42^56/((74-(5^2+9)*2.1))-20"; // ok
@@ -542,12 +543,29 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             (op == '*' && b.content.number_int != 0)
             && ((b.content.number_int > 0 && (a.content.number_int > LLONG_MAX / b.content.number_int || a.content.number_int < LLONG_MIN / b.content.number_int))
             || (b.content.number_int < 0 && (a.content.number_int < LLONG_MAX / b.content.number_int || a.content.number_int > LLONG_MIN / b.content.number_int)))
-        ) { isAnOverflow = 1; }
+        ) { printf("MULTI"); isAnOverflow = 1; }
 
-        else if (
-            op == '^'
-            && ((double)a.content.number_int <= pow(LLONG_MAX, 1.0/(double)b.content.number_int) && (double)a.content.number_int >= pow(LLONG_MIN, 1.0/(double)b.content.number_int))
-        ) { isAnOverflow = 1; }
+        else if (op == '^') {
+
+            long long result = 1;
+
+            if (b.content.number_int < 0) {
+                printf("overflow");
+                isAnOverflow = 1;
+            }
+            else {
+                for (long long i = 0; i < b.content.number_int; i++) {
+
+                    if (a.content.number_int != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_int)) {
+                        printf("overflow");
+                        isAnOverflow = 1;
+                        break;
+                    }
+
+                    result *= a.content.number_int;
+                }
+            }
+        }
     }
     else if (IS_INT(a.flags) && IS_FLOAT(b.flags)) {
         if (
@@ -562,10 +580,27 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             || (b.content.number_double < 0 && (a.content.number_int < LLONG_MAX / b.content.number_double || a.content.number_int > LLONG_MIN / b.content.number_double)))
         ) { isAnOverflow = 1; }
 
-        else if (
-            op == '^'
-            && ((double)a.content.number_int <= pow(LLONG_MAX, 1.0/b.content.number_double) && (double)a.content.number_int >= pow(LLONG_MIN, 1.0/b.content.number_double))
-        ) { isAnOverflow = 1; }
+        else if (op == '^') {
+
+            long long result = 1;
+
+            if (b.content.number_double < 0) {
+                printf("overflow");
+                isAnOverflow = 1;
+            }
+            else {
+                for (long long i = 0; i < b.content.number_double; i++) {
+
+                    if (a.content.number_int != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_int)) {
+                        printf("overflow");
+                        isAnOverflow = 1;
+                        break;
+                    }
+
+                    result *= a.content.number_int;
+                }
+            }
+        }
     }
     else if (IS_FLOAT(a.flags) && IS_INT(b.flags)) {
         if (
@@ -580,10 +615,27 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             || (b.content.number_int < 0 && (a.content.number_double < LLONG_MAX / b.content.number_int || a.content.number_double > LLONG_MIN / b.content.number_int)))
         ) { isAnOverflow = 1; }
 
-        else if (
-            op == '^'
-            && (a.content.number_double <= pow(LLONG_MAX, 1.0/(double)b.content.number_int) && a.content.number_double >= pow(LLONG_MIN, 1.0/(double)b.content.number_int))
-        ) { isAnOverflow = 1; }
+        else if (op == '^') {
+
+            long long result = 1;
+
+            if (b.content.number_int < 0) {
+                printf("overflow");
+                isAnOverflow = 1;
+            }
+            else {
+                for (long long i = 0; i < b.content.number_int; i++) {
+
+                    if (a.content.number_double != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_double)) {
+                        printf("overflow");
+                        isAnOverflow = 1;
+                        break;
+                    }
+
+                    result *= a.content.number_double;
+                }
+            }
+        }
     }
     else { // IS_FLOAT(a.flags) && IS_FLOAT(b.flags)
         if (
@@ -598,10 +650,27 @@ char isItAnOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             || (b.content.number_double < 0 && (a.content.number_double < LLONG_MAX / b.content.number_double || a.content.number_double > LLONG_MIN / b.content.number_double)))
         ) { isAnOverflow = 1; }
 
-        else if (
-            op == '^'
-            && (a.content.number_double <= pow(LLONG_MAX, 1.0/b.content.number_double) && a.content.number_double >= pow(LLONG_MIN, 1.0/b.content.number_double))
-        ) { isAnOverflow = 1; }
+        else if (op == '^') {
+
+            long long result = 1;
+
+            if (b.content.number_double < 0) {
+                printf("overflow");
+                isAnOverflow = 1;
+            }
+            else {
+                for (long long i = 0; i < b.content.number_double; i++) {
+
+                    if (a.content.number_double != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_double)) {
+                        printf("overflow");
+                        isAnOverflow = 1;
+                        break;
+                    }
+
+                    result *= a.content.number_double;
+                }
+            }
+        }
     }
 
     return isAnOverflow;
