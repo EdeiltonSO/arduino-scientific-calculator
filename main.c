@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
 
 #define IS_INT(flags)   !(flags | 0)
 #define IS_FLOAT(flags) flags & 1 << 7
@@ -34,7 +35,7 @@ void printElementList(ELEMENT_LIST elementList) {
         unsigned char flags = element.flags;
 
         if(IS_FLOAT(flags)) printf("%f ", element.content.number_double);
-        else if (IS_INT(flags)) printf("%d ", element.content.number_int);
+        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
 }
@@ -48,7 +49,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
         flags = element.flags;
 
         if (IS_FLOAT(flags)) printf("%f ", element.content.number_double);
-        else if (IS_INT(flags)) printf("%i ", element.content.number_int);
+        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
         else printf("%c ", element.content.symbol_char);
     }
 }
@@ -393,26 +394,26 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
 int stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT *result) {
     if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) exit(1);
     
-    printExpElementArray(rpnStack, stackSize);
-    printf("\n");
+    // printExpElementArray(rpnStack, stackSize);
+    // printf("\n");
 
-    printf("stackSize: %i\n\n", stackSize);
+    // printf("stackSize: %i\n\n", stackSize);
     for (int i = 0; i < stackSize; i++)
     {
         if (IS_CHAR(rpnStack[i].flags))
         {
             EXPRESSION_ELEMENT firstElement = rpnStack[i-2];
             EXPRESSION_ELEMENT secondElement = rpnStack[i-1];
-            printExpElementArray(&firstElement, 1);
-            printExpElementArray(&rpnStack[i], 1);
-            printExpElementArray(&secondElement, 1);
+            // printExpElementArray(&firstElement, 1);
+            // printExpElementArray(&rpnStack[i], 1);
+            // printExpElementArray(&secondElement, 1);
             
             EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
             rpnStack[i] = intermediateResult;
-            printf("= ");
-            printExpElementArray(&intermediateResult, 1);
+            // printf("= ");
+            // printExpElementArray(&intermediateResult, 1);
 
-            printf("\n---------------------------\n");
+            // printf("\n---------------------------\n");
 
             for (int j = i; j < stackSize; j++)
             {
@@ -441,34 +442,34 @@ char* calculate(char input[]) {
     char* output;
 
     // SYNTAX ERROR
-    printf("\n%s", input);
-    if (hasSyntaxError(input)) { printf("\nsyntax error\n\n"); exit(1); }
+    // printf("\n%s", input);
+    if (hasSyntaxError(input)) { printf("[syntax error]"); exit(1); }
     
     // ADD ZEROS
     addCharsToSpecialCases(input, &inputWithZeros);
 
     // TRANSFORM TO STRUCT
-    printf("\n");
+    // printf("\n");
     ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
-    printElementList(structuredExp);
+    // printElementList(structuredExp);
 
     // CREATE RPN STACK
-    printf("\n");
+    // printf("\n");
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
-    printExpElementArray(rpnStack, structuredExp.RPNExpSize);
+    // printExpElementArray(rpnStack, structuredExp.RPNExpSize);
 
     // STACK SOLVER
-    printf("\n");
+    // printf("\n");
     stackSolver(rpnStack, structuredExp.RPNExpSize, &result);
 
-    printf("\n");
+    // printf("\n###");
     printExpElementArray(&result, 1);
-    printf("\n\n");
+    // printf("\n\n");
 }
 
 void divZeroError() {
-    printf("div/0");
+    printf("[div/0 error]");
     exit(1);
 }
 
@@ -655,7 +656,7 @@ void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
         }
     }
 
-    if (isAnOverflow) { printf("overflow"); exit(1); }
+    if (isAnOverflow) { printf("[overflow error]"); exit(1); }
 }
 
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
