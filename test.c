@@ -57,7 +57,7 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
 char* calculate(char input[]);
 char countSizeAfterAddSpecialChars(char[]);
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
-void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
+void overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
 
 int hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
@@ -514,7 +514,7 @@ char countSizeAfterAddSpecialChars(char input[]) {
     return inputCount+shift;
 }
 
-void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
+void overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
     char isAnOverflow = 0;
 
     if (IS_INT(a.flags) && IS_INT(b.flags)) {
@@ -669,14 +669,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
 
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_int = firstElement.content.number_int + secondElement.content.number_int;
             break;
         case '-':
             operateTwoElementsResult.content.number_int = firstElement.content.number_int - secondElement.content.number_int;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_int = firstElement.content.number_int * secondElement.content.number_int;
             break;
         case '/':
@@ -693,7 +693,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             }
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_int = powl(firstElement.content.number_int, secondElement.content.number_int);
             break;
         default:
@@ -704,14 +704,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else if (IS_INT(firstElement.flags) && IS_FLOAT(secondElement.flags)) {
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_int + secondElement.content.number_double;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_int - secondElement.content.number_double;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_int * secondElement.content.number_double;
             break;
         case '/':
@@ -720,7 +720,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_double;
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_int, secondElement.content.number_double);
             break;
         default:
@@ -731,14 +731,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else if (IS_FLOAT(firstElement.flags) && IS_INT(secondElement.flags)) {
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_int;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_int;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_int;
             break;
         case '/':
@@ -747,7 +747,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_int;
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_int);
             break;
         default:
@@ -758,14 +758,14 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else { // IS_FLOAT(firstElement.flags) && IS_FLOAT(secondElement.flags)
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_double;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_double;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_double;
             break;
         case '/':
@@ -774,7 +774,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_double;
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowError(firstElement, secondElement, operator.content.symbol_char);
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_double);
             break;
         default:

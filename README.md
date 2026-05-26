@@ -94,3 +94,15 @@ Símbolo  | Flag | Prioridade
 ( )      | 100  | 4
 
 A prioridade de qualquer número é sempre **zero**.
+
+### Estrutura de erros
+
+Um `EXPRESSION_ELEMENT` de resultado pode conter o resultado da operação ou um código de erro.
+Se contiver um código de erro (verificável conforme a tabela `Bits 7:0 (flags dos EXPRESSION_ELEMENT)` acima), este código estará armazenado no campo `content.symbol_char`:
+
+Código | Descrição
+-----: | ------------------------
+0      | Sem erros (a saída contém o resultado da operação)
+1      | Erro de sintaxe
+2      | Divisão por zero
+3      | Overflow
