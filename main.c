@@ -6,6 +6,7 @@
 #define IS_INT(flags)   !(flags | 0)
 #define IS_FLOAT(flags) flags & 1 << 7
 #define IS_CHAR(flags)  !(flags & 1 << 7) && flags | 0
+#define IS_ERROR(flags) flags & 1 << 6
 
 typedef struct {
     unsigned char flags;
@@ -54,43 +55,48 @@ void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
     }
 }
 
-char* calculate(char input[]);
+void calculate(char[], EXPRESSION_ELEMENT *);
 char countSizeAfterAddSpecialChars(char[]);
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
-void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
+char overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
 
-int hasSyntaxError(char[]);
+char hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
-int stackSolver(EXPRESSION_ELEMENT *, int, EXPRESSION_ELEMENT *);
+char stackSolver(EXPRESSION_ELEMENT *, int, EXPRESSION_ELEMENT *);
 
 int main() {
-    char a[] = "0.5+35.9+42^5/((74-(5^2+9)*2.1))-20"; // ok
-    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok 
-    char c[] = "1+1"; // ok
-    char d[] = "-1*3*(4-2)/5*(-1)"; // ok
-    char e[] = "-3.5*15/(3+2)^2-1"; // ok
-    char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok
-    char g[] = "-3.5*15+(-2.5+.4)"; // ok
-    char h[] = "-3.5*15+(-2.5*.4)"; // ok
-    char i[] = "-3.5-15+(-2.5*.4)"; // ok
-    char j[] = "5+((1+2)*4)-3"; // ok
+    char a[] = "0.5+35.9+42^5/((74-(5^2+9)*2.1))-20"; // ok = 50265874.861539
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok = 3.626953
+    char c[] = "1+1"; // ok = 2
+        char d[] = "-1*3*(4-2)/5*(-1)"; // ERRO: "Exceção de ponto flutuante (imagem do núcleo gravada)"  (devia ser ok = 1.2)
+    char e[] = "-3.5*15/(3+2)^2-1"; // ok = -3.100000
+        char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ERRO: vazio (devia ser ok = 5,457832769×10^88)
+    char g[] = "-3.5*15+(-2.5+.4)"; // ok = -54.600000
+    char h[] = "-3.5*15+(-2.5*.4)"; // ok = -53.500000
+    char i[] = "-3.5-15+(-2.5*.4)"; // ok = -19.500000
+    char j[] = "5+((1+2)*4)-3"; // ok = 14
 
-    char k[] = "+"; // ok (syntax error)
-    char l[] = "1/0"; // ok (divisao por 0)
-    char m[] = "7.7777777777+1.1111111111"; // ok
-    char n[] = "2147483647+1"; // ok
+        char k[] = "+"; // ERRO: vazio (devia ser syntax error)
+        char l[] = "1/0"; // ERRO: vazio (devia ser divisao por 0)
+    char m[] = "7.7777777777+1.1111111111"; // ok = 8.888889
+    char n[] = "2147483647+1"; // ok = 2147483648
+        char o[] = "+1"; // ERRO: vazio (devia ser syntax error)
+        char p[] = "1+"; // ERRO: vazio (devia ser syntax error)
     
-    char* testeAtual = a;
+    char* testeAtual = p;
+    EXPRESSION_ELEMENT output;
 
-    calculate(testeAtual);
+    calculate(testeAtual, &output);
+    printExpElementArray(&output, 1);
+    // printf("\n%f\n", output.content.number_double);
 
     return 0;
 }
 
 // FUNÇÕES PRINCIPAIS
-int hasSyntaxError(char exp[]) {
+char hasSyntaxError(char exp[]) {
     char pos = 1;
     char openedBrackets = 0;
     char dotsOfCurrentNumber = 0;
@@ -283,7 +289,7 @@ ELEMENT_LIST transformCharToStruct(char exp[]) {
                 {
                     if (currentNumber[i] == '.')
                     {
-                        number.flags = 0x80;
+                        number.flags = 0b10000000;
                         break;
                     }
                     i++;
@@ -391,8 +397,11 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
     output[outputSize-1].flags |= 0b01000000;
 }
 
-int stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT *result) {
-    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) exit(1);
+char stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT *result) {
+    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) { 
+        // printf("[syntax error]"); 
+        return 1; 
+    }
     
     // printExpElementArray(rpnStack, stackSize);
     // printf("\n");
@@ -409,7 +418,15 @@ int stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT 
             // printExpElementArray(&secondElement, 1);
             
             EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
+
+            // printf("\nANTES\n");
+            // printf("\n%b\n", intermediateResult.flags);
+            // printf("\n%i\n", intermediateResult.content.symbol_char);
+            if (IS_ERROR(intermediateResult.flags)) return intermediateResult.content.symbol_char;
+            // printf("\nMEIO\n");
             rpnStack[i] = intermediateResult;
+            // printf("\nDEPOIS\n");
+
             // printf("= ");
             // printExpElementArray(&intermediateResult, 1);
 
@@ -433,17 +450,21 @@ int stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT 
 }
 
 // FUNÇÕES AUXILIARES
-char* calculate(char input[]) {
+void calculate(char input[], EXPRESSION_ELEMENT *output) {
     ARRAY inputWithZeros;
+    char hasError = 0;
 
-    EXPRESSION_ELEMENT result;
-    result.flags = 0b00000000;
-
-    char* output;
+    output->flags = 0b00000000;
 
     // SYNTAX ERROR
     // printf("\n%s", input);
-    if (hasSyntaxError(input)) { printf("[syntax error]"); exit(1); }
+    hasError = hasSyntaxError(input);
+    if (hasError) {
+        // printf("[syntax error]");
+        output->flags = 0b01000000;
+        output->content.symbol_char = hasError;
+        return;
+    }
     
     // ADD ZEROS
     addCharsToSpecialCases(input, &inputWithZeros);
@@ -451,26 +472,34 @@ char* calculate(char input[]) {
     // TRANSFORM TO STRUCT
     // printf("\n");
     ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
-    // printElementList(structuredExp);
+    // printf(">>> "); printElementList(structuredExp);
 
     // CREATE RPN STACK
     // printf("\n");
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
-    // printExpElementArray(rpnStack, structuredExp.RPNExpSize);
+    // printf(">>> "); printExpElementArray(rpnStack, structuredExp.RPNExpSize);
 
-    // STACK SOLVER
-    // printf("\n");
-    stackSolver(rpnStack, structuredExp.RPNExpSize, &result);
+    // STACK SOLVER    
+    hasError = stackSolver(rpnStack, structuredExp.RPNExpSize, output);
+    if (hasError) {
+        // printf("[syntax error]");
+        output->flags = 0b01000000;
+        output->content.symbol_char = hasError;
+        return;
+    }
 
     // printf("\n###");
-    printExpElementArray(&result, 1);
+    // printExpElementArray(&output, 1);
     // printf("\n\n");
+    // return &output;
 }
 
-void divZeroError() {
-    printf("[div/0 error]");
-    exit(1);
+char divZeroError(EXPRESSION_ELEMENT *divZeroResultError) {
+    // printf("[div/0 error]");
+    divZeroResultError->flags = 0b01000000;
+    divZeroResultError->content.symbol_char = 2;
+    // return 2;
 }
 
 char countSizeAfterAddSpecialChars(char input[]) {
@@ -514,7 +543,7 @@ char countSizeAfterAddSpecialChars(char input[]) {
     return inputCount+shift;
 }
 
-void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
+char overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
     char isAnOverflow = 0;
 
     if (IS_INT(a.flags) && IS_INT(b.flags)) {
@@ -656,11 +685,18 @@ void breakIfOverflow(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
         }
     }
 
-    if (isAnOverflow) { printf("[overflow error]"); exit(1); }
+    // printf("[overflow error]: %i\n", isAnOverflow); 
+    if (isAnOverflow) { 
+        // printf("[overflow error]"); 
+        return 3; 
+    }
+    
+    return 0;
 }
 
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
     EXPRESSION_ELEMENT operateTwoElementsResult;
+    char overflowCodeError = 0;
 
     operateTwoElementsResult.flags = 0b10000000;
     
@@ -668,21 +704,37 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
         operateTwoElementsResult.flags = 0b00000000;
 
         switch (operator.content.symbol_char) {
+
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_int = firstElement.content.number_int + secondElement.content.number_int;
             break;
+
         case '-':
             operateTwoElementsResult.content.number_int = firstElement.content.number_int - secondElement.content.number_int;
             break;
+
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_int = firstElement.content.number_int * secondElement.content.number_int;
             break;
+
         case '/':
-            if (secondElement.content.number_int == 0)
-                divZeroError();
-            else{
+            if (secondElement.content.number_int == 0) {
+                divZeroError(&operateTwoElementsResult);
+                break;
+            }
+            else {
                 if (firstElement.content.number_int % secondElement.content.number_int == 0) {
                     operateTwoElementsResult.content.number_int = firstElement.content.number_int / secondElement.content.number_int;
                 }
@@ -692,10 +744,17 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
                 }
             }
             break;
+
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_int = powl(firstElement.content.number_int, secondElement.content.number_int);
             break;
+
         default:
             break;
         }
@@ -704,23 +763,40 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else if (IS_INT(firstElement.flags) && IS_FLOAT(secondElement.flags)) {
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_int + secondElement.content.number_double;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_int - secondElement.content.number_double;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_int * secondElement.content.number_double;
             break;
         case '/':
-            if (secondElement.content.number_double == 0.0)
-                divZeroError();
+            if (secondElement.content.number_double == 0.0) {
+                divZeroError(&operateTwoElementsResult);
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_double;
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_int, secondElement.content.number_double);
             break;
         default:
@@ -731,23 +807,40 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else if (IS_FLOAT(firstElement.flags) && IS_INT(secondElement.flags)) {
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_int;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_int;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_int;
             break;
         case '/':
-            if (secondElement.content.number_int == 0)
-                divZeroError();
+            if (secondElement.content.number_int == 0) {
+                divZeroError(&operateTwoElementsResult);
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_int;
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_int);
             break;
         default:
@@ -758,23 +851,40 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     else { // IS_FLOAT(firstElement.flags) && IS_FLOAT(secondElement.flags)
         switch (operator.content.symbol_char) {
         case '+':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double + secondElement.content.number_double;
             break;
         case '-':
             operateTwoElementsResult.content.number_double = firstElement.content.number_double - secondElement.content.number_double;
             break;
         case '*':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_double;
             break;
         case '/':
-            if (secondElement.content.number_double == 0.0)
-                divZeroError();
+            if (secondElement.content.number_double == 0.0) {
+                divZeroError(&operateTwoElementsResult);
+                break;
+            }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_double;
             break;
         case '^':
-            breakIfOverflow(firstElement, secondElement, operator.content.symbol_char);
+            overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
+            if (overflowCodeError) {
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = overflowCodeError;
+                break;
+            }
             operateTwoElementsResult.content.number_double = powl(firstElement.content.number_double, secondElement.content.number_double);
             break;
         default:
@@ -782,5 +892,6 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
         }
     }
 
+    // printf("\n############ %b\n", operateTwoElementsResult.flags);
     return operateTwoElementsResult;
 }
