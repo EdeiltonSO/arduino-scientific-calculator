@@ -8,6 +8,11 @@
 #define IS_CHAR(flags)  !(flags & 1 << 7) && flags | 0
 #define IS_ERROR(flags) flags & 1 << 6
 
+#define NO_ERROR_CODE       0
+#define SINTAX_ERROR_CODE   1
+#define DIV_ZERO_ERROR_CODE 2
+#define OVERFLOW_ERROR_CODE 3
+
 typedef struct {
     unsigned char flags;
     union {
@@ -29,68 +34,53 @@ typedef struct {
     char* values;
 } ARRAY;
 
-void printElementList(ELEMENT_LIST elementList) {
-    for (int i = 0; i < elementList.size; i++)
-    {
-        EXPRESSION_ELEMENT element = elementList.list[i];
-        unsigned char flags = element.flags;
-
-        if(IS_FLOAT(flags)) printf("%f ", element.content.number_double);
-        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
-}
-
-void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
-    unsigned char flags;
-    EXPRESSION_ELEMENT element;
-    for (int i = 0; i < stackSize; i++)
-    {
-        element = stack[i];
-        flags = element.flags;
-
-        if (IS_FLOAT(flags)) printf("%f ", element.content.number_double);
-        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
-    }
-}
-
-void calculate(char[], EXPRESSION_ELEMENT *);
-char countSizeAfterAddSpecialChars(char[]);
-EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
-char overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op);
-
+// PRINCIPAIS
 char hasSyntaxError(char[]);
 void addCharsToSpecialCases(char[], ARRAY *);
 ELEMENT_LIST transformCharToStruct(char[]);
 void createRPNStack(ELEMENT_LIST, EXPRESSION_ELEMENT*);
 char stackSolver(EXPRESSION_ELEMENT *, int, EXPRESSION_ELEMENT *);
 
-int main() {
-    char a[] = "0.5+35.9+42^5/((74-(5^2+9)*2.1))-20"; // ok = 50265874.861539
-    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok = 3.626953
-    char c[] = "1+1"; // ok = 2
-        char d[] = "-1*3*(4-2)/5*(-1)"; // ERRO: "Exceção de ponto flutuante (imagem do núcleo gravada)"  (devia ser ok = 1.2)
-    char e[] = "-3.5*15/(3+2)^2-1"; // ok = -3.100000
-        char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ERRO: vazio (devia ser ok = 5,457832769×10^88)
-    char g[] = "-3.5*15+(-2.5+.4)"; // ok = -54.600000
-    char h[] = "-3.5*15+(-2.5*.4)"; // ok = -53.500000
-    char i[] = "-3.5-15+(-2.5*.4)"; // ok = -19.500000
-    char j[] = "5+((1+2)*4)-3"; // ok = 14
+// AUXILIARES
+void calculate(char[], EXPRESSION_ELEMENT *);
+char countSizeAfterAddSpecialChars(char[]);
+char overflowError(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, char);
+EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
 
-        char k[] = "+"; // ERRO: vazio (devia ser syntax error)
-        char l[] = "1/0"; // ERRO: vazio (devia ser divisao por 0)
-    char m[] = "7.7777777777+1.1111111111"; // ok = 8.888889
-    char n[] = "2147483647+1"; // ok = 2147483648
-        char o[] = "+1"; // ERRO: vazio (devia ser syntax error)
-        char p[] = "1+"; // ERRO: vazio (devia ser syntax error)
+// TEMPORÁRIAS
+void printElementList(ELEMENT_LIST);
+void printExpElementArray(EXPRESSION_ELEMENT *, int);
+
+int main() {
+    char a[] = "0.5+35.9+42^5/((74-(5^2+9)*2.1))-20"; // ok: 50265874.861539
+    char b[] = "(3.5*15/(3+0.2)^2-1.5)"; // ok: 3.626953
+    char c[] = "1+1"; // ok: 2
+    char d[] = "-1*3*(4-2)/5*(-1)"; // ok: 1.2
+    char e[] = "-3.5*15/(3+2)^2-1"; // ok: -3.100000
+    char f[] = "(-.5*35.9+42^56/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok: [overflow error]
+    char g[] = "-3.5*15+(-2.5+.4)"; // ok: -54.600000
+    char h[] = "-3.5*15+(-2.5*.4)"; // ok: -53.500000
+    char i[] = "-3.5-15+(-2.5*.4)"; // ok: -19.500000
+    char j[] = "5+((1+2)*4)-3"; // ok: 14
+    char k[] = "+"; // ok: [sintax error]
+    char l[] = "1/0"; // ok: [div/0 error]
+    char m[] = "7.7777777777+1.1111111111"; // ok: 8.888889
+    char n[] = "2147483647+1"; // ok: 2147483648
+    char o[] = "+1"; // ok: [sintax error]
+    char p[] = "1+"; // ok: [sintax error]
+    char q[] = "(-.5*35.9+42^11/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok: 4906842933918337.000000
     
-    char* testeAtual = p;
+    char* testeAtual = a;
     EXPRESSION_ELEMENT output;
 
     calculate(testeAtual, &output);
-    printExpElementArray(&output, 1);
-    // printf("\n%f\n", output.content.number_double);
+
+    // corrigir prints
+    // --------------------------------------------------------
+    printExpElementArray(&output, 1); // resultado
+    printf("\n#%x | %d", output.flags, output.content.symbol_char);
+    printf("\n> %f\n", output.content.number_double);
+    // --------------------------------------------------------
 
     return 0;
 }
@@ -107,25 +97,25 @@ char hasSyntaxError(char exp[]) {
         exp[0] == ')' || 
         exp[0] == '\0' ||
         ((exp[0] == '+' || exp[0] == '-') && exp[pos] == '\0')
-    ) return 1;
+    ) return SINTAX_ERROR_CODE;
 
     if (exp[0] == '(') openedBrackets++;
 
     while (exp[pos] != '\0') {
         if (exp[pos] == '.') {
             dotsOfCurrentNumber++;
-            if (dotsOfCurrentNumber > 1) return 1;
+            if (dotsOfCurrentNumber > 1) return SINTAX_ERROR_CODE;
         }
         else
             if (exp[pos] < '0' || exp[pos] > '9') dotsOfCurrentNumber = 0;
 
         if (exp[pos] >= '0' && exp[pos] <= '9' &&
         (exp[pos-1] == ')' || exp[pos+1] == '(')
-        ) return 1;
+        ) return SINTAX_ERROR_CODE;
         
         else if (exp[pos] == '.'
         && (exp[pos+1] < '0' || exp[pos+1] > '9')
-        ) return 1;
+        ) return SINTAX_ERROR_CODE;
 
         else if (exp[pos] == '+' || exp[pos] == '-')
         {
@@ -133,7 +123,7 @@ char hasSyntaxError(char exp[]) {
             && (exp[pos-1] < '(' || exp[pos-1] > ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
             && exp[pos+1] != '(' && exp[pos+1] != '.'
-            ) return 1;
+            ) return SINTAX_ERROR_CODE;
         }
 
         else if (exp[pos] == '*' || exp[pos] == '/' || exp[pos] == '^')
@@ -142,7 +132,7 @@ char hasSyntaxError(char exp[]) {
             && (exp[pos-1] != ')')
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
             && exp[pos+1] != '(' && exp[pos+1] != '.'
-            ) return 1;
+            ) return SINTAX_ERROR_CODE;
         }
 
         else if (exp[pos] == '(')
@@ -154,7 +144,7 @@ char hasSyntaxError(char exp[]) {
             || (exp[pos+1] < '0' || exp[pos+1] > '9')
             && exp[pos+1] != '+' && exp[pos+1] != '-'
             && exp[pos+1] != '(' && exp[pos+1] != '.'
-            ) return 1;
+            ) return SINTAX_ERROR_CODE;
         }
 
         else if (exp[pos] == ')')
@@ -165,12 +155,12 @@ char hasSyntaxError(char exp[]) {
             && exp[pos+1] != '*' && exp[pos+1] != '/'
             && exp[pos+1] != '^' && exp[pos+1] != ')'
             && exp[pos+1] != '\0'
-            ) return 1;
+            ) return SINTAX_ERROR_CODE;
         }
 
         if (exp[pos+1] == '\0'
             && (exp[pos] < '0' || exp[pos] > '9')
-            && exp[pos] != ')') return 1;
+            && exp[pos] != ')') return SINTAX_ERROR_CODE;
 
         pos++;
     }
@@ -398,44 +388,24 @@ void createRPNStack(ELEMENT_LIST input, EXPRESSION_ELEMENT* output) {
 }
 
 char stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT *result) {
-    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) { 
-        // printf("[syntax error]"); 
-        return 1; 
-    }
+    if (stackSize <3 && IS_CHAR(rpnStack[0].flags)) 
+        return SINTAX_ERROR_CODE;
     
-    // printExpElementArray(rpnStack, stackSize);
-    // printf("\n");
-
-    // printf("stackSize: %i\n\n", stackSize);
     for (int i = 0; i < stackSize; i++)
     {
         if (IS_CHAR(rpnStack[i].flags))
         {
             EXPRESSION_ELEMENT firstElement = rpnStack[i-2];
             EXPRESSION_ELEMENT secondElement = rpnStack[i-1];
-            // printExpElementArray(&firstElement, 1);
-            // printExpElementArray(&rpnStack[i], 1);
-            // printExpElementArray(&secondElement, 1);
-            
             EXPRESSION_ELEMENT intermediateResult = operateTwoElements(firstElement, secondElement, rpnStack[i]);
 
-            // printf("\nANTES\n");
-            // printf("\n%b\n", intermediateResult.flags);
-            // printf("\n%i\n", intermediateResult.content.symbol_char);
-            if (IS_ERROR(intermediateResult.flags)) return intermediateResult.content.symbol_char;
-            // printf("\nMEIO\n");
+            if (IS_ERROR(intermediateResult.flags)) 
+                return intermediateResult.content.symbol_char;
+
             rpnStack[i] = intermediateResult;
-            // printf("\nDEPOIS\n");
-
-            // printf("= ");
-            // printExpElementArray(&intermediateResult, 1);
-
-            // printf("\n---------------------------\n");
 
             for (int j = i; j < stackSize; j++)
-            {
                 rpnStack[j-2] = rpnStack[j];
-            }
 
             stackSize -= 2;
             i = 0;
@@ -443,7 +413,7 @@ char stackSolver(EXPRESSION_ELEMENT *rpnStack, int stackSize, EXPRESSION_ELEMENT
             if (stackSize == 1)
             {
                 *result = intermediateResult;
-                return 0;
+                return NO_ERROR_CODE;
             }
         }
     }
@@ -457,10 +427,8 @@ void calculate(char input[], EXPRESSION_ELEMENT *output) {
     output->flags = 0b00000000;
 
     // SYNTAX ERROR
-    // printf("\n%s", input);
     hasError = hasSyntaxError(input);
     if (hasError) {
-        // printf("[syntax error]");
         output->flags = 0b01000000;
         output->content.symbol_char = hasError;
         return;
@@ -470,36 +438,19 @@ void calculate(char input[], EXPRESSION_ELEMENT *output) {
     addCharsToSpecialCases(input, &inputWithZeros);
 
     // TRANSFORM TO STRUCT
-    // printf("\n");
     ELEMENT_LIST structuredExp = transformCharToStruct(inputWithZeros.values);
-    // printf(">>> "); printElementList(structuredExp);
 
     // CREATE RPN STACK
-    // printf("\n");
     EXPRESSION_ELEMENT rpnStack[structuredExp.RPNExpSize];
     createRPNStack(structuredExp, rpnStack);
-    // printf(">>> "); printExpElementArray(rpnStack, structuredExp.RPNExpSize);
 
     // STACK SOLVER    
     hasError = stackSolver(rpnStack, structuredExp.RPNExpSize, output);
     if (hasError) {
-        // printf("[syntax error]");
         output->flags = 0b01000000;
         output->content.symbol_char = hasError;
         return;
     }
-
-    // printf("\n###");
-    // printExpElementArray(&output, 1);
-    // printf("\n\n");
-    // return &output;
-}
-
-char divZeroError(EXPRESSION_ELEMENT *divZeroResultError) {
-    // printf("[div/0 error]");
-    divZeroResultError->flags = 0b01000000;
-    divZeroResultError->content.symbol_char = 2;
-    // return 2;
 }
 
 char countSizeAfterAddSpecialChars(char input[]) {
@@ -568,13 +519,13 @@ char overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
         else if (op == '^') {
 
             long long result = 1;
-
+            
             if (b.content.number_int < 0) {
                 isAnOverflow = 1;
             }
             else {
                 for (long long i = 0; i < b.content.number_int; i++) {
-
+                    
                     if (a.content.number_int != 0 && llabs(result) > LLONG_MAX / llabs(a.content.number_int)) {
                         isAnOverflow = 1;
                         break;
@@ -625,11 +576,12 @@ char overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
             || (b.content.number_int < 0 && a.content.number_double < LLONG_MIN - b.content.number_int))
         ) { isAnOverflow = 1; }
 
-        else if (
-            (op == '*' && b.content.number_int != 0)
-            && ((b.content.number_int > 0 && (a.content.number_double > LLONG_MAX / b.content.number_int || a.content.number_double < LLONG_MIN / b.content.number_int))
-            || (b.content.number_int < 0 && (a.content.number_double < LLONG_MAX / b.content.number_int || a.content.number_double > LLONG_MIN / b.content.number_int)))
-        ) { isAnOverflow = 1; }
+        else if (op == '*' && b.content.number_int != -1 && b.content.number_int != 0) {
+            if (
+                (b.content.number_int > 0 && (a.content.number_double > LLONG_MAX / b.content.number_int || a.content.number_double < LLONG_MIN / b.content.number_int))
+                || (b.content.number_int < 0 && (a.content.number_double < LLONG_MAX / b.content.number_int || a.content.number_double > LLONG_MIN / b.content.number_int))
+            ) { isAnOverflow = 1; }
+        }
 
         else if (op == '^') {
 
@@ -685,13 +637,10 @@ char overflowError(EXPRESSION_ELEMENT a, EXPRESSION_ELEMENT b, char op) {
         }
     }
 
-    // printf("[overflow error]: %i\n", isAnOverflow); 
-    if (isAnOverflow) { 
-        // printf("[overflow error]"); 
-        return 3; 
-    }
+    if (isAnOverflow)
+        return OVERFLOW_ERROR_CODE;
     
-    return 0;
+    return NO_ERROR_CODE;
 }
 
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSION_ELEMENT secondElement, EXPRESSION_ELEMENT operator) {
@@ -702,7 +651,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     
     if (IS_INT(firstElement.flags) && IS_INT(secondElement.flags)) {
         operateTwoElementsResult.flags = 0b00000000;
-
+        
         switch (operator.content.symbol_char) {
 
         case '+':
@@ -731,7 +680,8 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
 
         case '/':
             if (secondElement.content.number_int == 0) {
-                divZeroError(&operateTwoElementsResult);
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = DIV_ZERO_ERROR_CODE;
                 break;
             }
             else {
@@ -739,7 +689,7 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
                     operateTwoElementsResult.content.number_int = firstElement.content.number_int / secondElement.content.number_int;
                 }
                 else {
-                    operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_int;
+                    operateTwoElementsResult.content.number_double = (double) firstElement.content.number_int / (double) secondElement.content.number_int;
                     operateTwoElementsResult.flags = 0b10000000;
                 }
             }
@@ -785,7 +735,8 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             break;
         case '/':
             if (secondElement.content.number_double == 0.0) {
-                divZeroError(&operateTwoElementsResult);
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = DIV_ZERO_ERROR_CODE;
                 break;
             }
             operateTwoElementsResult.content.number_double = firstElement.content.number_int / secondElement.content.number_double;
@@ -825,14 +776,15 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
                 operateTwoElementsResult.content.symbol_char = overflowCodeError;
                 break;
             }
-            operateTwoElementsResult.content.number_double = firstElement.content.number_double * secondElement.content.number_int;
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double * (double) secondElement.content.number_int;
             break;
         case '/':
             if (secondElement.content.number_int == 0) {
-                divZeroError(&operateTwoElementsResult);
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = DIV_ZERO_ERROR_CODE;
                 break;
             }
-            operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_int;
+            operateTwoElementsResult.content.number_double = firstElement.content.number_double / (double) secondElement.content.number_int;
             break;
         case '^':
             overflowCodeError = overflowError(firstElement, secondElement, operator.content.symbol_char);
@@ -873,7 +825,8 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
             break;
         case '/':
             if (secondElement.content.number_double == 0.0) {
-                divZeroError(&operateTwoElementsResult);
+                operateTwoElementsResult.flags = 0b01000000;
+                operateTwoElementsResult.content.symbol_char = DIV_ZERO_ERROR_CODE;
                 break;
             }
             operateTwoElementsResult.content.number_double = firstElement.content.number_double / secondElement.content.number_double;
@@ -892,6 +845,31 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
         }
     }
 
-    // printf("\n############ %b\n", operateTwoElementsResult.flags);
     return operateTwoElementsResult;
+}
+
+void printElementList(ELEMENT_LIST elementList) {
+    for (int i = 0; i < elementList.size; i++)
+    {
+        EXPRESSION_ELEMENT element = elementList.list[i];
+        unsigned char flags = element.flags;
+
+        if(IS_FLOAT(flags)) printf("%f ", element.content.number_double);
+        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
+}
+
+void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
+    unsigned char flags;
+    EXPRESSION_ELEMENT element;
+    for (int i = 0; i < stackSize; i++)
+    {
+        element = stack[i];
+        flags = element.flags;
+
+        if (IS_FLOAT(flags)) printf("%f ", element.content.number_double);
+        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
+        else printf("%c ", element.content.symbol_char);
+    }
 }
