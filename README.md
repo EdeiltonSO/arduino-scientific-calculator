@@ -9,20 +9,21 @@
 4. \+ e -
 
 ### Etapas
-- [ ] receber entrada
+- [x] receber entrada
 - [x] checar erros de sintaxe
 - [x] add 0 antes dos +, - e . que precisarem
 - [x] explodir a string
-- [x] converter em vetor de structs (avaliar uso de atoi e atof)
+- [x] converter em vetor de structs
 - [x] jogar structs numa pilha RPN
 - [x] resolver a pilha em RPN
-- [ ] formatar dado de saída
+- [x] formatar dado de saída
+- [ ] passar pro arduino
 
 ## HARDWARE
 
 ### Para implementação na versão atual
 
-- on/off: chave (direto no vcc)
+- on/off: chave (direto no vcc?)
 
 - clear
 - backspace
@@ -59,20 +60,20 @@ shift (pra inversa das funções abaixo)
 ## Problemas futuros
 - tratar sintax error pra press = com string vazia (ignorar tentativa)
 - ler um float com "qualquer" precisão e calcular como notação científica
-- mapear erros possíveis e separar em categorias (return 1, return 2, etc)
+- ~mapear erros possíveis e separar em categorias (return 1, return 2, etc)~
 - alternar entre graus e radianos (quando tiver função trigonométrica)
 - add verificação de tamanho de números em transformCharToStruct
-- trocar condicionais complexas por diretivas define
+- ~trocar condicionais complexas por diretivas define~
 - permitir que o usuário calcule "1(1+1)"
 - implementar raízes de índice N
 
 ## Coisas a documentar
-- constante `e` obtida com `e^1`
+- constante `e` obtida com `e^1` (versão futura)
 - constante `π` obtida digitando manualmente (6 casas de precisão)
 - precisão arredondada em números com mais de 6 casas decimais após a vírgula
 - explicar limitação de 6 casas decimais para float
-- fazer tabela com prioridades dos elementos
-- explicar flags do `EXPRESSION_ELEMENT`
+- ~fazer tabela com prioridades dos elementos~
+- ~explicar flags do `EXPRESSION_ELEMENT`~
 - explicar estrutura `ELEMENT_LIST`
 
 ## Notas

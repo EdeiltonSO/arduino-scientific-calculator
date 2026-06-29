@@ -46,10 +46,8 @@ void calculate(char[], EXPRESSION_ELEMENT *);
 char countSizeAfterAddSpecialChars(char[]);
 char overflowError(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, char);
 EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT, EXPRESSION_ELEMENT, EXPRESSION_ELEMENT);
-
-// TEMPORÁRIAS
-void printElementList(ELEMENT_LIST);
-void printExpElementArray(EXPRESSION_ELEMENT *, int);
+char* getErrorMessage(char);
+char* getResultString(EXPRESSION_ELEMENT);
 
 int main() {
     char a[] = "0.5+35.9+42^5/((74-(5^2+9)*2.1))-20"; // ok: 50265874.861539
@@ -69,18 +67,26 @@ int main() {
     char o[] = "+1"; // ok: [sintax error]
     char p[] = "1+"; // ok: [sintax error]
     char q[] = "(-.5*35.9+42^11/(-(-74-(+5^2+9)*2.123456789123456789))-20)"; // ok: 4906842933918337.000000
-    
-    char* testeAtual = a;
+    char r[] = "";
+
+    // --------------------------------------------------------
+
     EXPRESSION_ELEMENT output;
-
-    calculate(testeAtual, &output);
-
-    // corrigir prints
+    char* outputString;
+    
     // --------------------------------------------------------
-    printExpElementArray(&output, 1); // resultado
-    printf("\n#%x | %d", output.flags, output.content.symbol_char);
-    printf("\n> %f\n", output.content.number_double);
+
+    calculate(r, &output);
+
     // --------------------------------------------------------
+
+    outputString = IS_ERROR(output.flags)
+        ? getErrorMessage(output.content.symbol_char)
+        : getResultString(output);
+
+    // --------------------------------------------------------
+
+    printf("%s", outputString);
 
     return 0;
 }
@@ -848,28 +854,38 @@ EXPRESSION_ELEMENT operateTwoElements(EXPRESSION_ELEMENT firstElement, EXPRESSIO
     return operateTwoElementsResult;
 }
 
-void printElementList(ELEMENT_LIST elementList) {
-    for (int i = 0; i < elementList.size; i++)
-    {
-        EXPRESSION_ELEMENT element = elementList.list[i];
-        unsigned char flags = element.flags;
-
-        if(IS_FLOAT(flags)) printf("%f ", element.content.number_double);
-        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
+char* getErrorMessage(char errorCode) {
+    switch (errorCode) {
+        case 1:
+            return "[syntax error]";
+        case 2:
+            return "[div/0 error]";
+        case 3:
+            return "[overflow error]";
+        default:
+            return "[error]";
     }
 }
 
-void printExpElementArray(EXPRESSION_ELEMENT* stack, int stackSize) {
-    unsigned char flags;
-    EXPRESSION_ELEMENT element;
-    for (int i = 0; i < stackSize; i++)
-    {
-        element = stack[i];
-        flags = element.flags;
+char* getResultString(EXPRESSION_ELEMENT result) {
+    int length;
 
-        if (IS_FLOAT(flags)) printf("%f ", element.content.number_double);
-        else if (IS_INT(flags)) printf("%lli ", element.content.number_int);
-        else printf("%c ", element.content.symbol_char);
+    if (IS_FLOAT(result.flags))
+        length = snprintf(NULL, 0, "%f", result.content.number_double);
+    else
+        length = snprintf(NULL, 0, "%lli", result.content.number_int);
+
+    char *resultString = malloc(length + 1);
+
+    if (IS_FLOAT(result.flags))
+        snprintf(resultString, length + 1, "%f", result.content.number_double);
+    else
+        snprintf(resultString, length + 1, "%lli", result.content.number_int);
+
+    for (int i = 0; resultString[i] != '\0'; i++) {
+        if (resultString[i] == '.')
+            resultString[i] = ',';
     }
+    
+    return resultString;
 }
